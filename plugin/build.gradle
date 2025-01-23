@@ -1,0 +1,59 @@
+plugins {
+    id "application"
+    id 'java'
+    id 'com.gradleup.shadow' version '8.3.1'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(path: ':backend')
+
+    implementation group: 'org.ow2.asm', name: 'asm', version: '9.7.1'
+
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_22
+    targetCompatibility = JavaVersion.VERSION_22
+}
+
+group = 'sandium'
+version = syntaxyVersion
+
+ext {
+    javaMainClass = "org.sandium.Main"
+    javaModules = "java.base"   // Comma separated list
+    itchLinuxDist = "build/dists/itch-linux"
+    itchWindowsDist = "build/dists/itch-windows"
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': javaMainClass
+    }
+}
+
+application {
+    applicationDefaultJvmArgs = ['--enable-native-access=ALL-UNNAMED']
+    mainClass = javaMainClass
+}
+
+shadowJar{
+    archiveFileName = "Sandium.jar"
+}
+
+ext.getEnvVar = { String name, String message ->
+    def glfwIncludeDir = System.getenv(name)
+    if (glfwIncludeDir == null)
+        throw new GradleException(message)
+    return glfwIncludeDir
+} as Closure<String>

@@ -1,0 +1,3 @@
+rootProject.name = 'Syntaxy'
+
+include 'plugin', 'backend', 'server'
