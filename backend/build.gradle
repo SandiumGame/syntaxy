@@ -7,6 +7,8 @@ repositories {
 }
 
 dependencies {
+    implementation group: 'software.amazon.awssdk', name: 'bedrockruntime', version: '2.30.4'
+
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
 }
@@ -19,6 +21,6 @@ group = 'sandium'
 version = syntaxyVersion
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_22
-    targetCompatibility = JavaVersion.VERSION_22
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }

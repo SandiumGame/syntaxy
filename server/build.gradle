@@ -8,8 +8,8 @@ group = 'sandium.syntaxy-server'
 version = syntaxyVersion
 
 java {
-	sourceCompatibility = JavaVersion.VERSION_22
-	targetCompatibility = JavaVersion.VERSION_22
+	sourceCompatibility = JavaVersion.VERSION_17
+	targetCompatibility = JavaVersion.VERSION_17
 }
 
 configurations {
