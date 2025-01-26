@@ -9,6 +9,12 @@
     <resource-bundle>messages.TextBundle</resource-bundle>
 
     <extensions defaultExtensionNs="com.intellij">
-        <toolWindow factoryClass="org.sandium.syntaxy.plugin.toolwindow.SyntaxyToolWindow" id="Syntaxy"/>
+        <toolWindow factoryClass="org.sandium.syntaxy.plugin.toolwindow.SyntaxyToolWindowFactory" id="Syntaxy"/>
+
+        <applicationConfigurable
+                parentId="tools"
+                instance="org.sandium.syntaxy.plugin.core.ApplicationSettingsConfigurable"
+                id="org.sandium.syntaxy.plugin.core.ApplicationSettingsConfigurable"
+                displayName="My Application Settings"/>
     </extensions>
 </idea-plugin>
