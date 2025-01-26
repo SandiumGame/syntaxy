@@ -1,4 +1,4 @@
-package org.sandium.syntaxy.plugin.toolwindow;
+package org.sandium.syntaxy.plugin;
 
 import com.intellij.DynamicBundle;
 import org.jetbrains.annotations.NotNull;

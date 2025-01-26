@@ -11,10 +11,13 @@
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow factoryClass="org.sandium.syntaxy.plugin.toolwindow.SyntaxyToolWindowFactory" id="Syntaxy"/>
 
+        <applicationService serviceImplementation="org.sandium.syntaxy.plugin.settings.AppSettings"/>
+
         <applicationConfigurable
                 parentId="tools"
-                instance="org.sandium.syntaxy.plugin.core.ApplicationSettingsConfigurable"
-                id="org.sandium.syntaxy.plugin.core.ApplicationSettingsConfigurable"
-                displayName="My Application Settings"/>
+                instance="org.sandium.syntaxy.plugin.settings.AppSettingsConfigurable"
+                id="org.sandium.syntaxy.plugin.settings.AppSettingsConfigurable"
+                bundle="messages.TextBundle"
+                key="settingsName"/>
     </extensions>
 </idea-plugin>
