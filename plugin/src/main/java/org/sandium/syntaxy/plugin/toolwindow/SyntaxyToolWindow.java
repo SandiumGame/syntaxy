@@ -17,10 +17,12 @@ public class SyntaxyToolWindow {
 
         outputPanel = new OutputPanel();
         inputPanel = new InputPanel();
+
         //Create a split pane with the two scroll panes in it.
         content = new JBSplitter();
+        content.setProportion(0.75f);
         // TODO
-        // content.setSplitterProportionKey();
+        content.setSplitterProportionKey("org.sandium.syntaxy.plugin.toolwindow.SyntaxyToolWindow.SplitterProportion");
         content.setOrientation(true);
         content.setFirstComponent(outputPanel.getContent());
         content.setSecondComponent(inputPanel.getContent());

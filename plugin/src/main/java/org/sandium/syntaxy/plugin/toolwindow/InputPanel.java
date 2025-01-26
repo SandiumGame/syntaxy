@@ -3,6 +3,7 @@ package org.sandium.syntaxy.plugin.toolwindow;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBScrollPane;
+import com.intellij.ui.components.JBTextArea;
 
 import javax.swing.*;
 import java.awt.*;
@@ -23,8 +24,7 @@ public class InputPanel {
         // Root panel
         content = new JBPanel<>();
         content.setLayout(new BorderLayout());
-        Dimension minimumSize = new Dimension(10, 100);
-        content.setMinimumSize(minimumSize);
+        content.setMinimumSize(new Dimension(10, 100));
 
         // Dropdown for model selection
         String[] models = {"GPT-4", "GPT-3.5", "Custom Model"};
@@ -36,7 +36,7 @@ public class InputPanel {
         content.add(topPanel, BorderLayout.NORTH);
 
         // Text input area for user query
-        JTextArea queryInput = new JTextArea(10, 100);
+        JBTextArea queryInput = new JBTextArea();
         queryInput.setLineWrap(true);
         queryInput.setWrapStyleWord(true);
         JBScrollPane scrollPane = new JBScrollPane(queryInput);
