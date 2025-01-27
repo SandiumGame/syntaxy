@@ -2,5 +2,10 @@ package org.sandium.syntaxy.backend;
 
 public interface AiResultListener {
 
-    void resultUpdated(AiResult result);
+    default void contentUpdated(AiResult result) {}
+
+    default void requestFinished(AiResult result) {}
+
+    default void usageUpdated(AiResult result, long amountSpentNanos) {}
+
 }

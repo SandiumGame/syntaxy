@@ -1,25 +1,43 @@
 package org.sandium.syntaxy.plugin.toolwindow;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.components.JBTextArea;
+import org.sandium.syntaxy.backend.AiResult;
+import org.sandium.syntaxy.backend.AiResultListener;
 import org.sandium.syntaxy.plugin.core.AiService;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 
 import static org.sandium.syntaxy.plugin.toolwindow.SyntaxyToolWindow.INSET;
 import static org.sandium.syntaxy.plugin.toolwindow.SyntaxyToolWindow.TEXT_AREA_INSET;
 
 public class InputPanel {
 
-    private AiService aiService;
+    private final AiService aiService;
+    private final ArrayList<AiResultListener> listeners;
     private JBPanel<?> content;
 
-    public InputPanel(Project project) {
-        aiService = project.getService(AiService.class);
+    public InputPanel(Project project, OutputPanel outputPanel) {
+        aiService = ApplicationManager.getApplication().getService(AiService.class);
+
+        listeners = new ArrayList<>();
+        listeners.add(outputPanel.getListener());
+        listeners.add(new AiResultListener() {
+            public void contentUpdated(AiResult result) {
+                System.out.println("Debug input");
+            }
+
+            public void usageUpdated(AiResult result, long amountSpentNanos) {
+                aiService.addUsage(amountSpentNanos);
+            }
+        });
+
         createPanel();
     }
 
@@ -54,8 +72,8 @@ public class InputPanel {
             String selectedModel = (String) modelDropdown.getSelectedItem();
             String userQuery = queryInput.getText();
 
-            // You can integrate with your AI backend here
-            aiService.execute(userQuery);
+            // TODO Need to pass model to use, open files, etc.
+            aiService.getAiAssistant().execute(userQuery, listeners);
         });
         JBPanel<?> bottomPanel = new JBPanel<>(new FlowLayout(FlowLayout.RIGHT));
         bottomPanel.add(submitButton);

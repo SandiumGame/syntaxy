@@ -3,6 +3,8 @@ package org.sandium.syntaxy.plugin.toolwindow;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.components.JBTextArea;
+import org.sandium.syntaxy.backend.AiResult;
+import org.sandium.syntaxy.backend.AiResultListener;
 
 import javax.swing.*;
 import java.awt.*;
@@ -30,6 +32,14 @@ public class OutputPanel {
 
     public JComponent getContent() {
         return content;
+    }
+
+    AiResultListener getListener() {
+        return new AiResultListener() {
+            public void contentUpdated(AiResult result) {
+                System.out.println("Debug output");
+            }
+        };
     }
 
     private void createPanel() {

@@ -1,15 +1,16 @@
 package org.sandium.syntaxy.backend;
 
+import java.util.Collection;
+
 public class AiResult {
 
-    private AiResultListener listener;
+    private Collection<AiResultListener> listeners;
     private StringBuilder content;
     private boolean contentFinished;
-    private int inputTokens;
-    private int outputTokens;
+    private long amountSpentNanos;
 
-    public AiResult(AiResultListener listener) {
-        this.listener = listener;
+    public AiResult(Collection<AiResultListener> listeners) {
+        this.listeners = listeners;
         content = new StringBuilder();
     }
 
@@ -21,12 +22,8 @@ public class AiResult {
         return contentFinished;
     }
 
-    public int getInputTokens() {
-        return inputTokens;
-    }
-
-    public int getOutputTokens() {
-        return outputTokens;
+    public long getAmountSpentNanos() {
+        return amountSpentNanos;
     }
 
     void addText(String text) {
@@ -37,8 +34,11 @@ public class AiResult {
         contentFinished = true;
     }
 
-    void addUsage(int inputTokens, int outputTokens) {
-        inputTokens += inputTokens;
-        outputTokens += outputTokens;
+    void addUsage(long amountSpentNanos) {
+        this.amountSpentNanos += amountSpentNanos;
+
+        for (AiResultListener listener : listeners) {
+            listener.usageUpdated(this, amountSpentNanos);
+        }
     }
 }

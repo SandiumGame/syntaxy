@@ -21,7 +21,7 @@ public class SyntaxyToolWindow {
         this.project = project;
 
         outputPanel = new OutputPanel();
-        inputPanel = new InputPanel(project);
+        inputPanel = new InputPanel(project, outputPanel);
 
         // Create a split pane
         content = new JBSplitter();

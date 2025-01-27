@@ -3,7 +3,13 @@ package org.sandium.syntaxy.backend;
 import org.sandium.syntaxy.backend.llm.LlmResultsHandler;
 import org.sandium.syntaxy.backend.llm.providers.Bedrock;
 
+import java.util.Collection;
+
 public class AiAssistant {
+
+    // TODO Needs to come from file
+    private final long INPUT_TOKEN_COST = (long)(0.003 / 1000 * 1000000000L);
+    private final long OUTPUT_TOKEN_COST = (long)(0.015 / 1000 * 1000000000L);
 
     /*
      * Categorize question
@@ -23,9 +29,9 @@ public class AiAssistant {
         bedrock = new Bedrock();
     }
 
-    public void execute(String text, AiResultListener listener) {
+    public void execute(String text, Collection<AiResultListener> listeners) {
         new Thread(() -> {
-            AiResult result = new AiResult(listener);
+            AiResult result = new AiResult(listeners);
 
             bedrock.converse(text, new LlmResultsHandler() {
                 @Override
@@ -40,7 +46,8 @@ public class AiAssistant {
 
                 @Override
                 public void onMetadata(int inputTokens, int outputTokens) {
-                    result.addUsage(inputTokens, outputTokens);
+                    result.addUsage(inputTokens * INPUT_TOKEN_COST + outputTokens * OUTPUT_TOKEN_COST);
+                    // TODO Remove println
                     System.out.println("tokens: " + inputTokens + " " + outputTokens);
                 }
             });

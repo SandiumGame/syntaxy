@@ -1,39 +1,39 @@
 package org.sandium.syntaxy.plugin.core;
 
+import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.openapi.components.Service;
 import org.sandium.syntaxy.backend.AiAssistant;
-import org.sandium.syntaxy.backend.llm.LlmResultsHandler;
 
-@Service(Service.Level.PROJECT)
+@Service(Service.Level.APP)
 public final class AiService {
 
+    private static final String AMOUNT_SPENT = "org.sandium.syntaxy.plugin.core.AiService.totalAmountSpent";
+
     private AiAssistant aiAssistant;
-    private Arr
+    private long totalAmountSpentNanos;
+
+    // TODO Loads local/project scripts - Can at least get the dir
 
     AiService() {
-        aiAssistant = new AiAssistant();
+        aiAssistant = new AiAssistant(); // TODO Need to set provider
+        try {
+            totalAmountSpentNanos = Long.parseLong(PropertiesComponent.getInstance().getValue(AMOUNT_SPENT, "0"));
+        } catch (NumberFormatException e) {
+            totalAmountSpentNanos = 0;
+        }
     }
 
-    // TODO Tracks usage
-    // TODO Loads local/project scripts
+    public AiAssistant getAiAssistant() {
+        return aiAssistant;
+    }
 
-    public void execute(String text) {
-        aiAssistant.execute(text, new LlmResultsHandler() {
-            @Override
-            public void onContent(String text) {
+    public long getTotalAmountSpentNanos() {
+        return totalAmountSpentNanos;
+    }
 
-            }
-
-            @Override
-            public void onContentFinished() {
-
-            }
-
-            @Override
-            public void onMetadata(int inputTokens, int outputTokens) {
-
-            }
-        });
+    public void addUsage(long amountSpentNanos) {
+        totalAmountSpentNanos += amountSpentNanos;
+        PropertiesComponent.getInstance().setValue(AMOUNT_SPENT, Long.toString(totalAmountSpentNanos));
     }
 
 }
