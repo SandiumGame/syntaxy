@@ -1,6 +1,6 @@
 package org.sandium.syntaxy.backend.llm.providers;
 
-import org.sandium.syntaxy.backend.llm.LlmOutputHandler;
+import org.sandium.syntaxy.backend.llm.LlmResultsHandler;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.bedrockruntime.BedrockRuntimeAsyncClient;
@@ -25,9 +25,15 @@ public class Bedrock {
                 .credentialsProvider(DefaultCredentialsProvider.create())
                 .region(Region.US_EAST_1)
                 .build();
+
+//        BedrockClient bedrockClient = BedrockClient.builder()
+//                .credentialsProvider(DefaultCredentialsProvider.create())
+//                .region(Region.US_EAST_1)
+//                .build();
+//        bedrockClient.listFoundationModels()
     }
 
-    public void converse(String inputText, LlmOutputHandler handler) {
+    public void converse(String inputText, LlmResultsHandler handler) {
         var message = Message.builder()
                 .content(ContentBlock.fromText(inputText))
                 .role(ConversationRole.USER)

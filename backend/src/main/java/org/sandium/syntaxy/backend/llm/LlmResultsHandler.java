@@ -1,6 +1,6 @@
 package org.sandium.syntaxy.backend.llm;
 
-public interface LlmOutputHandler {
+public interface LlmResultsHandler {
 
     void onContent(String text);
 

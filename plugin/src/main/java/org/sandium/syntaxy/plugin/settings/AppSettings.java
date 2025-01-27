@@ -17,6 +17,9 @@ final class AppSettings implements PersistentStateComponent<AppSettings.State> {
         @NonNls
         public String userId = "John Smith";
         public boolean ideaStatus = false;
+        // Provider
+        // Provider - Params
+        // Usage
     }
 
     private State myState = new State();

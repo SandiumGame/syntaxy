@@ -2,10 +2,15 @@ package org.sandium.syntaxy.plugin.toolwindow;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBSplitter;
+import com.intellij.util.ui.JBUI;
 
 import javax.swing.*;
+import java.awt.*;
 
 public class SyntaxyToolWindow {
+
+    public static final Insets INSET = JBUI.insets(2);
+    public static final Insets TEXT_AREA_INSET = JBUI.insets(5);
 
     private final Project project;
     private OutputPanel outputPanel;
@@ -16,12 +21,11 @@ public class SyntaxyToolWindow {
         this.project = project;
 
         outputPanel = new OutputPanel();
-        inputPanel = new InputPanel();
+        inputPanel = new InputPanel(project);
 
-        //Create a split pane with the two scroll panes in it.
+        // Create a split pane
         content = new JBSplitter();
         content.setProportion(0.75f);
-        // TODO
         content.setSplitterProportionKey("org.sandium.syntaxy.plugin.toolwindow.SyntaxyToolWindow.SplitterProportion");
         content.setOrientation(true);
         content.setFirstComponent(outputPanel.getContent());

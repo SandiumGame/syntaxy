@@ -1,12 +1,14 @@
 package org.sandium.syntaxy.plugin.toolwindow;
 
-import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.components.JBTextArea;
 
 import javax.swing.*;
 import java.awt.*;
+
+import static org.sandium.syntaxy.plugin.toolwindow.SyntaxyToolWindow.INSET;
+import static org.sandium.syntaxy.plugin.toolwindow.SyntaxyToolWindow.TEXT_AREA_INSET;
 
 public class OutputPanel {
 
@@ -16,10 +18,14 @@ public class OutputPanel {
     public OutputPanel() {
         createPanel();
 
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.fill = GridBagConstraints.VERTICAL;
+        constraints.weighty = 1;
+        output.add(new JPanel(), constraints);
+
         for (int i=0; i < 10; i++) {
             add("Hello " + i);
         }
-        output.add(Box.createVerticalGlue());
     }
 
     public JComponent getContent() {
@@ -27,7 +33,6 @@ public class OutputPanel {
     }
 
     private void createPanel() {
-        // Root panel
         content = new JBPanel<>();
         content.setLayout(new BorderLayout());
         content.setMinimumSize(new Dimension(10, 100));
@@ -43,10 +48,15 @@ public class OutputPanel {
         queryInput.setLineWrap(true);
         queryInput.setWrapStyleWord(true);
         queryInput.setText(text);
-        queryInput.setBorder(BorderFactory.createLineBorder(JBColor.border()));
+        queryInput.setMargin(TEXT_AREA_INSET);
 
-        output.add(queryInput);
-        output.add(Box.createRigidArea(new Dimension(0,5)));
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.gridy = output.getComponentCount();
+        constraints.fill = GridBagConstraints.HORIZONTAL;
+        constraints.weightx = 1;
+        constraints.insets = INSET;
+
+        output.add(queryInput, constraints);
     }
 
 }
