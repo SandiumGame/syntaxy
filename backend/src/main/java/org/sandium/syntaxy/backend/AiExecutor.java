@@ -5,7 +5,7 @@ import org.sandium.syntaxy.backend.llm.providers.Bedrock;
 
 import java.util.Collection;
 
-public class AiAssistant {
+public class AiExecutor {
 
     // TODO Needs to come from file
     private final long INPUT_TOKEN_COST = (long)(0.003 / 1000 * 1000000000L);
@@ -25,13 +25,13 @@ public class AiAssistant {
 
     private Bedrock bedrock;
 
-    public AiAssistant() {
+    public AiExecutor() {
         bedrock = new Bedrock();
     }
 
-    public void execute(String text, Collection<AiResultListener> listeners) {
+    public void execute(String text, Collection<ConversationListener> listeners) {
         new Thread(() -> {
-            AiResult result = new AiResult(listeners);
+            Conversation result = new Conversation(listeners);
 
             bedrock.converse(text, new LlmResultsHandler() {
                 @Override

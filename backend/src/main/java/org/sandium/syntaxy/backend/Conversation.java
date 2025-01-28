@@ -2,14 +2,14 @@ package org.sandium.syntaxy.backend;
 
 import java.util.Collection;
 
-public class AiResult {
+public class Conversation {
 
-    private Collection<AiResultListener> listeners;
+    private Collection<ConversationListener> listeners;
     private StringBuilder content;
     private boolean contentFinished;
     private long amountSpentNanos;
 
-    public AiResult(Collection<AiResultListener> listeners) {
+    public Conversation(Collection<ConversationListener> listeners) {
         this.listeners = listeners;
         content = new StringBuilder();
     }
@@ -37,7 +37,7 @@ public class AiResult {
     void addUsage(long amountSpentNanos) {
         this.amountSpentNanos += amountSpentNanos;
 
-        for (AiResultListener listener : listeners) {
+        for (ConversationListener listener : listeners) {
             listener.usageUpdated(this, amountSpentNanos);
         }
     }

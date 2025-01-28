@@ -6,8 +6,8 @@ import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.components.JBTextArea;
-import org.sandium.syntaxy.backend.AiResult;
-import org.sandium.syntaxy.backend.AiResultListener;
+import org.sandium.syntaxy.backend.Conversation;
+import org.sandium.syntaxy.backend.ConversationListener;
 import org.sandium.syntaxy.plugin.core.AiService;
 
 import javax.swing.*;
@@ -20,7 +20,7 @@ import static org.sandium.syntaxy.plugin.toolwindow.SyntaxyToolWindow.TEXT_AREA_
 public class InputPanel {
 
     private final AiService aiService;
-    private final ArrayList<AiResultListener> listeners;
+    private final ArrayList<ConversationListener> listeners;
     private JBPanel<?> content;
 
     public InputPanel(Project project, OutputPanel outputPanel) {
@@ -28,12 +28,12 @@ public class InputPanel {
 
         listeners = new ArrayList<>();
         listeners.add(outputPanel.getListener());
-        listeners.add(new AiResultListener() {
-            public void contentUpdated(AiResult result) {
+        listeners.add(new ConversationListener() {
+            public void contentUpdated(Conversation result) {
                 System.out.println("Debug input");
             }
 
-            public void usageUpdated(AiResult result, long amountSpentNanos) {
+            public void usageUpdated(Conversation result, long amountSpentNanos) {
                 aiService.addUsage(amountSpentNanos);
             }
         });
