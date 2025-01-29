@@ -13,6 +13,7 @@ public class Interaction {
 
     public Interaction(Conversation conversation) {
         this.conversation = conversation;
+        content = new StringBuilder();
     }
 
     public Model getModel() {
@@ -35,6 +36,10 @@ public class Interaction {
         return amountSpentNanos;
     }
 
+    public String getContent() {
+        return content.toString();
+    }
+
     public void addContent(String content) {
         this.content.append(content);
         for (ConversationListener listener : conversation.listeners) {
@@ -52,7 +57,7 @@ public class Interaction {
         // TODO Parse content
 
         for (ConversationListener listener : conversation.listeners) {
-            listener.contentAdded(this);
+            listener.interactionFinished(this);
         }
     }
 

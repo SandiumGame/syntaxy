@@ -51,10 +51,6 @@ public class SyntaxyToolWindow {
         content.setOrientation(true);
         content.setFirstComponent(createOutputPanel());
         content.setSecondComponent(createInputPanel());
-
-        for (int i=0; i < 10; i++) {
-            add("Hello " + i);
-        }
     }
 
     private void add(String text) {
@@ -136,6 +132,9 @@ public class SyntaxyToolWindow {
 
             @Override
             public void interactionFinished(Interaction interaction) {
+                add(interaction.getContent());
+
+                System.out.println("Usage: $" + aiService.getTotalAmountSpentNanos() / 1000000000.0);
                 // TODO enable submit button
             }
 
