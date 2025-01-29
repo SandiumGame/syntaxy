@@ -1,6 +1,6 @@
 package org.sandium.syntaxy.plugin.toolwindow;
 
-import org.sandium.syntaxy.backend.Conversation;
+import org.sandium.syntaxy.backend.llm.conversation.Conversation;
 
 public class FormattedResult {
 

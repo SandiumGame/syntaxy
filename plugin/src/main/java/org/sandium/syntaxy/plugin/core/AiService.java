@@ -23,7 +23,7 @@ public final class AiService {
         }
     }
 
-    public AiExecutor getAiAssistant() {
+    public AiExecutor getAiExecutor() {
         return aiExecutor;
     }
 

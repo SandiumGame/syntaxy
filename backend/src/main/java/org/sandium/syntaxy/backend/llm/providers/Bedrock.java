@@ -1,6 +1,6 @@
 package org.sandium.syntaxy.backend.llm.providers;
 
-import org.sandium.syntaxy.backend.llm.LlmResultsHandler;
+import org.sandium.syntaxy.backend.llm.conversation.Interaction;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.bedrockruntime.BedrockRuntimeAsyncClient;
@@ -14,10 +14,6 @@ import java.util.concurrent.ExecutionException;
 
 public class Bedrock {
 
-    private static final String MODEL = "anthropic.claude-3-haiku-20240307-v1:0";
-
-    private int totalInputTokens;
-    private int totalOutputTokens;
     private BedrockRuntimeAsyncClient client;
 
     public Bedrock() {
@@ -33,38 +29,39 @@ public class Bedrock {
 //        bedrockClient.listFoundationModels()
     }
 
-    public void converse(String inputText, LlmResultsHandler handler) {
+    public void execute(Interaction interaction) {
         var message = Message.builder()
-                .content(ContentBlock.fromText(inputText))
+                .content(ContentBlock.fromText(interaction.getQuery()))
                 .role(ConversationRole.USER)
                 .build();
 
-        // TODO Construct in constructor
         var responseStreamHandler = ConverseStreamResponseHandler.builder()
                 .subscriber(ConverseStreamResponseHandler.Visitor.builder()
-                        .onContentBlockDelta(chunk -> handler.onContent(chunk.delta().text()))
-                        .onContentBlockStop(stopEvent -> handler.onContentFinished())
+                        .onContentBlockDelta(chunk -> interaction.addContent(chunk.delta().text()))
+                        .onContentBlockStop(stopEvent -> interaction.setFinished())
                         .onMetadata(metadataEvent -> {
                             TokenUsage usage = metadataEvent.usage();
                             if (usage != null) {
-                                handler.onMetadata(usage.inputTokens() != null ? usage.inputTokens() : 0, usage.outputTokens() != null ? usage.outputTokens() : 0);
+                                interaction.addUsage(usage.inputTokens() != null ? usage.inputTokens() : 0,
+                                        usage.outputTokens() != null ? usage.outputTokens() : 0);
                             }
                         })
                         .build()
                 ).onError(err ->
-                        System.err.printf("Can't invoke '%s': %s", MODEL, err.getMessage())
+                        // TODO Handle errors
+                        System.err.printf("Can't invoke '%s': %s", interaction.getModel().getName(), err.getMessage())
                 ).build();
 
         try {
-            client.converseStream(request -> request.modelId(MODEL)
+            client.converseStream(request -> request.modelId(interaction.getModel().getName())
                     .messages(message)
                     .inferenceConfig(config -> config
+                            // TODO Remove maxTokens
                             .maxTokens(512)
-                            .temperature(0.5F)
-                            .topP(0.9F)
                     ), responseStreamHandler).get();
         } catch (ExecutionException | InterruptedException e) {
-            System.err.printf("Can't invoke '%s': %s", MODEL, e.getCause().getMessage());
+            // TODO Handle errors
+            System.err.printf("Can't invoke '%s': %s", interaction.getModel().getName(), e.getCause().getMessage());
         }
     }
 

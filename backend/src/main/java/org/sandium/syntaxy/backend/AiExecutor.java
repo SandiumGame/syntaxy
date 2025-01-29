@@ -1,9 +1,9 @@
 package org.sandium.syntaxy.backend;
 
-import org.sandium.syntaxy.backend.llm.LlmResultsHandler;
+import org.sandium.syntaxy.backend.llm.Model;
+import org.sandium.syntaxy.backend.llm.conversation.Conversation;
+import org.sandium.syntaxy.backend.llm.conversation.Interaction;
 import org.sandium.syntaxy.backend.llm.providers.Bedrock;
-
-import java.util.Collection;
 
 public class AiExecutor {
 
@@ -24,33 +24,28 @@ public class AiExecutor {
      */
 
     private Bedrock bedrock;
+    private Model model = new Model("anthropic.claude-3-haiku-20240307-v1:0", INPUT_TOKEN_COST, OUTPUT_TOKEN_COST);
 
     public AiExecutor() {
         bedrock = new Bedrock();
     }
 
-    public void execute(String text, Collection<ConversationListener> listeners) {
+    public Model getDefaultModel() {
+        return model;
+    }
+
+    public void execute(Conversation conversation) {
         new Thread(() -> {
-            Conversation result = new Conversation(listeners);
+            int size = conversation.getInteractions().size();
+            if (size == 0) {
+                throw new RuntimeException("Conversation does not have any interactions to execute");
+            }
+            Interaction interaction = conversation.getInteractions().get(size - 1);
+            if (interaction.isFinished()) {
+                throw new RuntimeException("Interaction has already been executed");
+            }
 
-            bedrock.converse(text, new LlmResultsHandler() {
-                @Override
-                public void onContent(String text) {
-                    result.addText(text);
-                }
-
-                @Override
-                public void onContentFinished() {
-                    result.setContentFinished();
-                }
-
-                @Override
-                public void onMetadata(int inputTokens, int outputTokens) {
-                    result.addUsage(inputTokens * INPUT_TOKEN_COST + outputTokens * OUTPUT_TOKEN_COST);
-                    // TODO Remove println
-                    System.out.println("tokens: " + inputTokens + " " + outputTokens);
-                }
-            });
+            bedrock.execute(interaction);
         }).start();
     }
 
