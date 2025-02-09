@@ -7,7 +7,7 @@ public class Interaction {
     private final Conversation conversation;
     private Model model;
     private String query;
-    private StringBuilder content;
+    private final StringBuilder content;
     private boolean finished;
     private long amountSpentNanos;
 

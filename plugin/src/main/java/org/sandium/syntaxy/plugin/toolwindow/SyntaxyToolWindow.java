@@ -25,7 +25,7 @@ public class SyntaxyToolWindow {
     public static final Insets TEXT_AREA_INSET = JBUI.insets(5);
 
     private final Project project;
-    private final ArrayList<Conversation> conversations;
+    private final ArrayList<ConversationPanel> conversationPanels;
     private final AiService aiService;
     private JBSplitter content;
     private JBPanel<?> output;
@@ -34,7 +34,7 @@ public class SyntaxyToolWindow {
 
     public SyntaxyToolWindow(Project project) {
         this.project = project;
-        conversations = new ArrayList<>();
+        conversationPanels = new ArrayList<>();
         aiService = ApplicationManager.getApplication().getService(AiService.class);
         createPanel();
     }
@@ -51,22 +51,6 @@ public class SyntaxyToolWindow {
         content.setOrientation(true);
         content.setFirstComponent(createOutputPanel());
         content.setSecondComponent(createInputPanel());
-    }
-
-    private void add(String text) {
-        JBTextArea queryInput = new JBTextArea();
-        queryInput.setLineWrap(true);
-        queryInput.setWrapStyleWord(true);
-        queryInput.setText(text);
-        queryInput.setMargin(TEXT_AREA_INSET);
-
-        GridBagConstraints constraints = new GridBagConstraints();
-        constraints.gridy = output.getComponentCount();
-        constraints.fill = GridBagConstraints.HORIZONTAL;
-        constraints.weightx = 1;
-        constraints.insets = INSET;
-
-        output.add(queryInput, constraints);
     }
 
     private JBPanel<?> createOutputPanel() {
@@ -122,33 +106,17 @@ public class SyntaxyToolWindow {
         String selectedModel = (String) modelDropdown.getSelectedItem();
         String userQuery = queryInput.getText();
 
-        Conversation conversation = new Conversation();
-        conversations.add(conversation);
-        conversation.addListener(new ConversationListener() {
-            @Override
-            public void contentAdded(Interaction interaction) {
-                // TODO update gui
-            }
+        ConversationPanel conversationPanel = new ConversationPanel();
+        conversationPanels.add(conversationPanel);
 
-            @Override
-            public void interactionFinished(Interaction interaction) {
-                add(interaction.getContent());
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.gridy = output.getComponentCount();
+        constraints.fill = GridBagConstraints.HORIZONTAL;
+        constraints.weightx = 1;
+        constraints.insets = INSET;
+        output.add(conversationPanel.getPanel(), constraints);
+        output.revalidate();
 
-                System.out.println("Usage: $" + aiService.getTotalAmountSpentNanos() / 1000000000.0);
-                // TODO enable submit button
-            }
-
-            @Override
-            public void usageUpdated(Conversation result, long amountSpentNanos) {
-                aiService.addUsage(amountSpentNanos);
-            }
-        });
-        Interaction interaction = conversation.addInteraction();
-        interaction.setQuery(userQuery);
-
-        // TODO Need to pass selected model to use, open files, etc.
-        AiExecutor executor = aiService.getAiExecutor();
-        interaction.setModel(executor.getDefaultModel());
-        executor.execute(conversation);
+        conversationPanel.submit(userQuery);
     }
 }

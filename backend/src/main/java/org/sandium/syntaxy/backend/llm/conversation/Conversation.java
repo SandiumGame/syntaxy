@@ -22,6 +22,11 @@ public class Conversation {
     public Interaction addInteraction() {
         Interaction interaction = new Interaction(this);
         interactions.add(interaction);
+
+        for (ConversationListener listener : listeners) {
+            listener.interactionAdded(interaction);
+        }
+
         return interaction;
     }
 
