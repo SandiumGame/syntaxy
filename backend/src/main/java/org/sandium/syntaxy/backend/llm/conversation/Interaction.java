@@ -2,9 +2,13 @@ package org.sandium.syntaxy.backend.llm.conversation;
 
 import org.sandium.syntaxy.backend.llm.Model;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 public class Interaction {
 
     private final Conversation conversation;
+    private Collection<InteractionListener> listeners;
     private Model model;
     private String query;
     private final StringBuilder content;
@@ -13,7 +17,12 @@ public class Interaction {
 
     public Interaction(Conversation conversation) {
         this.conversation = conversation;
+        listeners = new ArrayList<>();
         content = new StringBuilder();
+    }
+
+    public void addListener(InteractionListener listener) {
+        listeners.add(listener);
     }
 
     public Model getModel() {
@@ -42,7 +51,7 @@ public class Interaction {
 
     public void addContent(String content) {
         this.content.append(content);
-        for (ConversationListener listener : conversation.listeners) {
+        for (InteractionListener listener : listeners) {
             listener.contentAdded(this);
         }
     }

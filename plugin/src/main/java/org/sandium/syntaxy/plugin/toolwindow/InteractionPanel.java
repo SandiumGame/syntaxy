@@ -5,7 +5,9 @@ import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBTextArea;
 import com.intellij.util.ui.JBUI;
 import org.sandium.syntaxy.backend.llm.conversation.Interaction;
+import org.sandium.syntaxy.backend.llm.conversation.InteractionListener;
 
+import javax.swing.*;
 import java.awt.*;
 
 public class InteractionPanel {
@@ -14,19 +16,28 @@ public class InteractionPanel {
 
     private Interaction interaction;
     private final JBPanel<?> panel;
+    JBTextArea content;
 
     public InteractionPanel(Interaction interaction) {
         this.interaction = interaction;
 
         panel = new JBPanel<>(new VerticalFlowLayout(true, false));
+        content = new JBTextArea();
+        content.setLineWrap(true);
+        content.setWrapStyleWord(true);
+        content.setMargin(TEXT_AREA_INSET);
 
-        JBTextArea queryInput = new JBTextArea();
-        queryInput.setLineWrap(true);
-        queryInput.setWrapStyleWord(true);
-        queryInput.setText("Foo");
-        queryInput.setMargin(TEXT_AREA_INSET);
+        panel.add(content);
 
-        panel.add(queryInput);
+        interaction.addListener(new InteractionListener() {
+            @Override
+            public void contentAdded(Interaction interaction) {
+                SwingUtilities.invokeLater(() -> {
+                    content.setText(interaction.getContent());
+                    content.revalidate();
+                });
+            }
+        });
     }
 
     public JBPanel<?> getPanel() {

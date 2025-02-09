@@ -4,8 +4,6 @@ public interface ConversationListener {
 
     default void interactionAdded(Interaction interaction) {}
 
-    default void contentAdded(Interaction interaction) {}
-
     default void interactionFinished(Interaction interaction) {}
 
     default void usageUpdated(Conversation result, long amountSpentNanos) {}
