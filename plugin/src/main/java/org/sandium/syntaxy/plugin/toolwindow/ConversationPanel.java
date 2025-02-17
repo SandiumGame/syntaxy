@@ -4,9 +4,11 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.ui.VerticalFlowLayout;
 import com.intellij.ui.components.JBPanel;
 import org.sandium.syntaxy.backend.AiExecutor;
+import org.sandium.syntaxy.backend.ExecutionContext;
 import org.sandium.syntaxy.backend.llm.conversation.Conversation;
 import org.sandium.syntaxy.backend.llm.conversation.ConversationListener;
-import org.sandium.syntaxy.backend.llm.conversation.Interaction;
+import org.sandium.syntaxy.backend.llm.conversation.Message;
+import org.sandium.syntaxy.backend.llm.conversation.MessageType;
 import org.sandium.syntaxy.plugin.core.AiService;
 
 import javax.swing.*;
@@ -24,7 +26,7 @@ public class ConversationPanel {
     // Continue conversation
 
     private Conversation conversation;
-    private ArrayList<InteractionPanel> interactions;
+    private ArrayList<MessagePanel> interactions;
     private final JBPanel<?> panel;
     private final AiService aiService;
 
@@ -36,17 +38,17 @@ public class ConversationPanel {
 
         conversation.addListener(new ConversationListener() {
             @Override
-            public void interactionAdded(Interaction interaction) {
+            public void messageAdded(Message message) {
                 SwingUtilities.invokeLater(() -> {
-                    InteractionPanel interactionPanel = new InteractionPanel(interaction);
-                    interactions.add(interactionPanel);
-                    panel.add(interactionPanel.getPanel());
+                    MessagePanel messagePanel = new MessagePanel(message);
+                    interactions.add(messagePanel);
+                    panel.add(messagePanel.getPanel());
                     panel.revalidate();
                 });
             }
 
             @Override
-            public void interactionFinished(Interaction interaction) {
+            public void finished(Conversation conversation) {
                 System.out.println("Usage: $" + aiService.getTotalAmountSpentNanos() / 1000000000.0);
                 // TODO enable submit button
             }
@@ -62,16 +64,19 @@ public class ConversationPanel {
         return panel;
     }
 
-    public void submit(String userQuery) {
+    public void submit(String userQuery, ExecutionContext executionContext) {
         AiExecutor executor = aiService.getAiExecutor();
 
-        Interaction interaction = conversation.addInteraction();
-        interaction.setQuery(userQuery);
+        Message message = conversation.addMessage();
+        message.setMessageType(MessageType.USER);
+        message.setContent(userQuery);
         // TODO Need to pass selected model to use, open files, etc.
-        interaction.setModel(executor.getDefaultModel());
-        executor.execute(conversation);
+        conversation.setModel(executor.getDefaultModel());
+
+        executor.execute(conversation, executionContext);
 
         // TODO YAML Parser and system instructions
         // TODO Include open files
     }
+
 }

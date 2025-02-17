@@ -1,22 +1,23 @@
 package org.sandium.syntaxy.plugin.toolwindow;
 
-import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.editor.Document;
+import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.fileEditor.FileDocumentManager;
+import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.JBSplitter;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.components.JBTextArea;
 import com.intellij.util.ui.JBUI;
-import org.sandium.syntaxy.backend.AiExecutor;
-import org.sandium.syntaxy.backend.llm.conversation.Conversation;
-import org.sandium.syntaxy.backend.llm.conversation.ConversationListener;
-import org.sandium.syntaxy.backend.llm.conversation.Interaction;
-import org.sandium.syntaxy.plugin.core.AiService;
+import org.sandium.syntaxy.backend.ExecutionContext;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.nio.file.Path;
 import java.util.ArrayList;
 
 public class SyntaxyToolWindow {
@@ -26,7 +27,7 @@ public class SyntaxyToolWindow {
 
     private final Project project;
     private final ArrayList<ConversationPanel> conversationPanels;
-    private final AiService aiService;
+    private final ExecutionContext executionContext;
     private JBSplitter content;
     private JBPanel<?> output;
     private ComboBox<String> modelDropdown;
@@ -35,7 +36,8 @@ public class SyntaxyToolWindow {
     public SyntaxyToolWindow(Project project) {
         this.project = project;
         conversationPanels = new ArrayList<>();
-        aiService = ApplicationManager.getApplication().getService(AiService.class);
+        executionContext = new ExecutionContext();
+        executionContext.setProjectDir(Path.of(project.getBasePath() != null ? project.getBasePath() : "/"));
         createPanel();
     }
 
@@ -117,6 +119,28 @@ public class SyntaxyToolWindow {
         output.add(conversationPanel.getPanel(), constraints);
         output.revalidate();
 
-        conversationPanel.submit(userQuery);
+        updateExecutionContext();
+        conversationPanel.submit(userQuery, executionContext);
     }
+
+    private void updateExecutionContext() {
+        // Get path to currently selected editor tab
+        executionContext.setSelectedOpenFile(null);
+        Editor selectedTextEditor = FileEditorManager.getInstance(project).getSelectedTextEditor();
+        if (selectedTextEditor != null) {
+            Document doc = selectedTextEditor.getDocument();
+            VirtualFile selectedFile = FileDocumentManager.getInstance().getFile(doc);
+            if (selectedFile != null) {
+                executionContext.setSelectedOpenFile(Path.of(selectedFile.getPath()));
+            }
+        }
+
+        ArrayList<Path> openFiles = new ArrayList<>();
+        FileEditorManager fileEditorManager = FileEditorManager.getInstance(project);
+        for (VirtualFile openFile : fileEditorManager.getOpenFiles()) {
+            openFiles.add(Path.of(openFile.getPath()));
+        }
+        executionContext.setOpenFiles(openFiles);
+    }
+
 }

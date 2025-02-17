@@ -1,20 +1,23 @@
 package org.sandium.syntaxy.backend.llm.providers;
 
-import org.sandium.syntaxy.backend.llm.conversation.Interaction;
+import org.sandium.syntaxy.backend.llm.conversation.Conversation;
+import org.sandium.syntaxy.backend.llm.conversation.Message;
+import org.sandium.syntaxy.backend.llm.conversation.MessageType;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.bedrockruntime.BedrockRuntimeAsyncClient;
 import software.amazon.awssdk.services.bedrockruntime.model.ContentBlock;
 import software.amazon.awssdk.services.bedrockruntime.model.ConversationRole;
 import software.amazon.awssdk.services.bedrockruntime.model.ConverseStreamResponseHandler;
-import software.amazon.awssdk.services.bedrockruntime.model.Message;
+import software.amazon.awssdk.services.bedrockruntime.model.SystemContentBlock;
 import software.amazon.awssdk.services.bedrockruntime.model.TokenUsage;
 
+import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 
 public class Bedrock {
 
-    private BedrockRuntimeAsyncClient client;
+    private final BedrockRuntimeAsyncClient client;
 
     public Bedrock() {
         client = BedrockRuntimeAsyncClient.builder()
@@ -29,39 +32,52 @@ public class Bedrock {
 //        bedrockClient.listFoundationModels()
     }
 
-    public void execute(Interaction interaction) {
-        var message = Message.builder()
-                .content(ContentBlock.fromText(interaction.getQuery()))
-                .role(ConversationRole.USER)
-                .build();
+    public void execute(Conversation conversation) {
+        ArrayList<Message> messages = conversation.getMessages();
+        ArrayList<SystemContentBlock> systemMessages = new ArrayList<>();
+        ArrayList<software.amazon.awssdk.services.bedrockruntime.model.Message> bedrockMessages = new ArrayList<>();
+        for (Message message : messages) {
+            if (message.getMessageType() == MessageType.SYSTEM) {
+                systemMessages.add(SystemContentBlock.builder()
+                        .text(message.getContent())
+                        .build());
+            } else {
+                bedrockMessages.add(software.amazon.awssdk.services.bedrockruntime.model.Message.builder()
+                        .content(ContentBlock.fromText(message.getContent()))
+                        .role(message.getMessageType() == MessageType.USER ? ConversationRole.USER : ConversationRole.ASSISTANT)
+                        .build());
+            }
+        }
+
+        Message response = conversation.addMessage();
+        response.setMessageType(MessageType.ASSISTANT);
 
         var responseStreamHandler = ConverseStreamResponseHandler.builder()
                 .subscriber(ConverseStreamResponseHandler.Visitor.builder()
-                        .onContentBlockDelta(chunk -> interaction.addContent(chunk.delta().text()))
-                        .onContentBlockStop(stopEvent -> interaction.setFinished())
+                        .onContentBlockDelta(chunk -> response.addContent(chunk.delta().text()))
+                        .onContentBlockStop(stopEvent -> conversation.setFinished())
                         .onMetadata(metadataEvent -> {
                             TokenUsage usage = metadataEvent.usage();
                             if (usage != null) {
-                                interaction.addUsage(usage.inputTokens() != null ? usage.inputTokens() : 0,
+                                conversation.addUsage(usage.inputTokens() != null ? usage.inputTokens() : 0,
                                         usage.outputTokens() != null ? usage.outputTokens() : 0);
                             }
                         })
                         .build()
                 ).onError(err ->
                         // TODO Handle errors
-                        System.err.printf("Can't invoke '%s': %s", interaction.getModel().getName(), err.getMessage())
+                        System.err.printf("Can't invoke '%s': %s", conversation.getModel().getName(), err.getMessage())
                 ).build();
 
         try {
-            client.converseStream(request -> request.modelId(interaction.getModel().getName())
-                    .messages(message)
-                    .inferenceConfig(config -> config
-                            // TODO Remove maxTokens
-                            .maxTokens(512)
-                    ), responseStreamHandler).get();
+            client.converseStream(request -> request.modelId(conversation.getModel().getName())
+                    .system(systemMessages.toArray(SystemContentBlock[]::new))
+                    .messages(bedrockMessages.toArray(software.amazon.awssdk.services.bedrockruntime.model.Message[]::new))
+//                    .inferenceConfig(config -> config
+//                            .maxTokens(512))
+                    , responseStreamHandler).get();
         } catch (ExecutionException | InterruptedException e) {
-            // TODO Handle errors
-            System.err.printf("Can't invoke '%s': %s", interaction.getModel().getName(), e.getCause().getMessage());
+            throw new RuntimeException(e);
         }
     }
 

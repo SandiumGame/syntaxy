@@ -4,22 +4,22 @@ import com.intellij.openapi.ui.VerticalFlowLayout;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBTextArea;
 import com.intellij.util.ui.JBUI;
-import org.sandium.syntaxy.backend.llm.conversation.Interaction;
-import org.sandium.syntaxy.backend.llm.conversation.InteractionListener;
+import org.sandium.syntaxy.backend.llm.conversation.Message;
+import org.sandium.syntaxy.backend.llm.conversation.MessageListener;
 
 import javax.swing.*;
 import java.awt.*;
 
-public class InteractionPanel {
+public class MessagePanel {
 
     public static final Insets TEXT_AREA_INSET = JBUI.insets(5);
 
-    private Interaction interaction;
+    private Message message;
     private final JBPanel<?> panel;
     JBTextArea content;
 
-    public InteractionPanel(Interaction interaction) {
-        this.interaction = interaction;
+    public MessagePanel(Message message) {
+        this.message = message;
 
         panel = new JBPanel<>(new VerticalFlowLayout(true, false));
         content = new JBTextArea();
@@ -29,19 +29,24 @@ public class InteractionPanel {
 
         panel.add(content);
 
-        interaction.addListener(new InteractionListener() {
+        message.addListener(new MessageListener() {
             @Override
-            public void contentAdded(Interaction interaction) {
+            public void contentAdded(Message message) {
                 SwingUtilities.invokeLater(() -> {
-                    content.setText(interaction.getContent());
-                    content.revalidate();
+                    updateContentArea();
                 });
             }
         });
+        updateContentArea();
     }
 
     public JBPanel<?> getPanel() {
         return panel;
+    }
+
+    private void updateContentArea() {
+        content.setText(message.getContent());
+        content.revalidate();
     }
 
 }

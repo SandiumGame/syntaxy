@@ -2,7 +2,7 @@ package org.sandium.syntaxy.backend;
 
 import org.sandium.syntaxy.backend.llm.Model;
 import org.sandium.syntaxy.backend.llm.conversation.Conversation;
-import org.sandium.syntaxy.backend.llm.conversation.Interaction;
+import org.sandium.syntaxy.backend.llm.conversation.Message;
 import org.sandium.syntaxy.backend.llm.providers.Bedrock;
 
 public class AiExecutor {
@@ -34,18 +34,22 @@ public class AiExecutor {
         return model;
     }
 
-    public void execute(Conversation conversation) {
+    public void execute(Conversation conversation, ExecutionContext executionContext) {
         new Thread(() -> {
-            int size = conversation.getInteractions().size();
+            int size = conversation.getMessages().size();
             if (size == 0) {
-                throw new RuntimeException("Conversation does not have any interactions to execute");
+                throw new RuntimeException("Conversation does not have any messages.");
             }
-            Interaction interaction = conversation.getInteractions().get(size - 1);
-            if (interaction.isFinished()) {
-                throw new RuntimeException("Interaction has already been executed");
+            for (Message message : conversation.getMessages()) {
+                if (message.getMessageType() == null) {
+                    throw new RuntimeException("Message type can not be null.");
+                }
             }
 
-            bedrock.execute(interaction);
+            // TODO Verify model and other fields
+
+
+            bedrock.execute(conversation);
         }).start();
     }
 

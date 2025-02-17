@@ -2,9 +2,9 @@ package org.sandium.syntaxy.backend.llm.conversation;
 
 public interface ConversationListener {
 
-    default void interactionAdded(Interaction interaction) {}
+    default void messageAdded(Message message) {}
 
-    default void interactionFinished(Interaction interaction) {}
+    default void finished(Conversation conversation) {}
 
     default void usageUpdated(Conversation result, long amountSpentNanos) {}
 
