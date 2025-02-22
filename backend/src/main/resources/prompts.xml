@@ -1,0 +1,15 @@
+<prompts>
+    <models>
+        <model provider="bedrock" name="anthropic.claude-3-haiku-20240307-v1:0" inputCost="3.0" outputCost="15.0"/>
+    </models>
+    <llm id="main" type="router" model="">
+        <system>
+            Question
+
+            <include id="">Optional description</include>
+            <include groupName=""/> <!--Desciption not allowed-->
+        </system>
+
+        <userPrompt/>
+    </llm>
+</prompts>
