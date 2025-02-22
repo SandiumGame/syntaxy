@@ -2,12 +2,22 @@ package org.sandium.syntaxy.backend;
 
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.Locale;
 
 public class ExecutionContext {
 
+    private Locale userLocale;
     private Path projectDir;
     private Path selectedOpenFile;
     private Collection<Path> openFiles;
+
+    public Locale getUserLocale() {
+        return userLocale;
+    }
+
+    public void setUserLocale(Locale userLocale) {
+        this.userLocale = userLocale;
+    }
 
     public Path getProjectDir() {
         return projectDir;

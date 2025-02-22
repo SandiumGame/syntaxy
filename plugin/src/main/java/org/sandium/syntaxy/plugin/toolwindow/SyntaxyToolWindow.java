@@ -1,5 +1,6 @@
 package org.sandium.syntaxy.plugin.toolwindow;
 
+import com.intellij.DynamicBundle;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
@@ -124,6 +125,8 @@ public class SyntaxyToolWindow {
     }
 
     private void updateExecutionContext() {
+        executionContext.setUserLocale(DynamicBundle.getLocale());
+
         // Get path to currently selected editor tab
         executionContext.setSelectedOpenFile(null);
         Editor selectedTextEditor = FileEditorManager.getInstance(project).getSelectedTextEditor();
