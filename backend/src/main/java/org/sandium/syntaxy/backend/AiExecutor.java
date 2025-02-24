@@ -1,5 +1,7 @@
 package org.sandium.syntaxy.backend;
 
+import org.sandium.syntaxy.backend.config.Config;
+import org.sandium.syntaxy.backend.config.ConfigXmlParser;
 import org.sandium.syntaxy.backend.llm.Model;
 import org.sandium.syntaxy.backend.llm.conversation.Conversation;
 import org.sandium.syntaxy.backend.llm.conversation.Message;
@@ -23,10 +25,15 @@ public class AiExecutor {
      * 
      */
 
+    private Config config;
     private Bedrock bedrock;
     private Model model = new Model("anthropic.claude-3-haiku-20240307-v1:0", INPUT_TOKEN_COST, OUTPUT_TOKEN_COST);
 
     public AiExecutor() {
+        Config config = new Config();
+        ConfigXmlParser parser = new ConfigXmlParser(AiExecutor.class.getResourceAsStream("/config.xml"), config);
+        parser.parse();
+
         bedrock = new Bedrock();
     }
 
@@ -46,10 +53,16 @@ public class AiExecutor {
                 }
             }
 
+            // TODO Find script. Format text. Pass to LLM.
+            conversation.getScript();
+
             // TODO Verify model and other fields
 
-
             bedrock.execute(conversation);
+
+            // TODO Process results. i.e. What script if any to run next
+
+
         }).start();
     }
 

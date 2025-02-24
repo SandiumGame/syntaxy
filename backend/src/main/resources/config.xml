@@ -1,6 +1,6 @@
-<prompts>
+<config>
     <models>
-        <model provider="bedrock" name="anthropic.claude-3-haiku-20240307-v1:0" inputCost="3.0" outputCost="15.0"/>
+        <model provider="bedrock" alias="programming" name="anthropic.claude-3-haiku-20240307-v1:0" inputCost="3.0" outputCost="15.0"/>
     </models>
     <llm id="main" type="router" model="">
         <system>
@@ -12,4 +12,4 @@
 
         <userPrompt/>
     </llm>
-</prompts>
+</config>

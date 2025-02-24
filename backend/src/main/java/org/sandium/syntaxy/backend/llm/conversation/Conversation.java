@@ -7,10 +7,11 @@ import java.util.Collection;
 
 public class Conversation {
 
-    Collection<ConversationListener> listeners;
+    private final Collection<ConversationListener> listeners;
+    private final ArrayList<Message> messages;
+    private String script;
     private Model model;
-    private ArrayList<Message> messages;
-    long amountSpentNanos;
+    private long amountSpentNanos;
     private boolean finished;
 
     public Conversation() {
@@ -35,6 +36,14 @@ public class Conversation {
 
     public void addListener(ConversationListener listener) {
         listeners.add(listener);
+    }
+
+    public String getScript() {
+        return script;
+    }
+
+    public void setScript(String script) {
+        this.script = script;
     }
 
     public Model getModel() {

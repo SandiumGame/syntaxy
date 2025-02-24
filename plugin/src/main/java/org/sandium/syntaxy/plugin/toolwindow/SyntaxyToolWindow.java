@@ -1,6 +1,7 @@
 package org.sandium.syntaxy.plugin.toolwindow;
 
 import com.intellij.DynamicBundle;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
@@ -14,6 +15,7 @@ import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.components.JBTextArea;
 import com.intellij.util.ui.JBUI;
 import org.sandium.syntaxy.backend.ExecutionContext;
+import org.sandium.syntaxy.plugin.core.AiService;
 
 import javax.swing.*;
 import java.awt.*;
@@ -40,6 +42,10 @@ public class SyntaxyToolWindow {
         executionContext = new ExecutionContext();
         executionContext.setProjectDir(Path.of(project.getBasePath() != null ? project.getBasePath() : "/"));
         createPanel();
+
+        // TODO Remove? Just here to load config on IDEA start.
+        // TODO Need to catch exceptions
+        ApplicationManager.getApplication().getService(AiService.class);
     }
 
     public JComponent getContent() {

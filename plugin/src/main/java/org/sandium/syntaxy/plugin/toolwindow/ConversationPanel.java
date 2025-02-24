@@ -25,8 +25,8 @@ public class ConversationPanel {
     // Buttons - Confirm plan, apply diffs, create JIRA ticket, etc
     // Continue conversation
 
-    private Conversation conversation;
-    private ArrayList<MessagePanel> interactions;
+    private final Conversation conversation;
+    private final ArrayList<MessagePanel> interactions;
     private final JBPanel<?> panel;
     private final AiService aiService;
 
@@ -70,13 +70,10 @@ public class ConversationPanel {
         Message message = conversation.addMessage();
         message.setMessageType(MessageType.USER);
         message.setContent(userQuery);
-        // TODO Need to pass selected model to use, open files, etc.
+
+        conversation.setScript("main");
         conversation.setModel(executor.getDefaultModel());
-
         executor.execute(conversation, executionContext);
-
-        // TODO YAML Parser and system instructions
-        // TODO Include open files
     }
 
 }
