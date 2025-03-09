@@ -1,8 +1,10 @@
 <config>
     <models>
-        <model provider="bedrock" alias="programming" name="anthropic.claude-3-haiku-20240307-v1:0" inputCost="3.0" outputCost="15.0"/>
+        <model provider="bedrock" name="Claude 3" id="anthropic.claude-3-haiku*" inputCost="3.0" outputCost="15.0"/>
+
+        <modelAlias provider="bedrock" name="Claude 3" alias="Programming"/>
     </models>
-    <llm id="main" type="router" model="">
+    <agent id="main" type="router" model="">
         <system>
             Question
 
@@ -11,5 +13,5 @@
         </system>
 
         <userPrompt/>
-    </llm>
+    </agent>
 </config>

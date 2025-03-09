@@ -5,6 +5,10 @@ import org.sandium.syntaxy.backend.llm.conversation.Message;
 import org.sandium.syntaxy.backend.llm.conversation.MessageType;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.bedrock.BedrockClient;
+import software.amazon.awssdk.services.bedrock.model.FoundationModelSummary;
+import software.amazon.awssdk.services.bedrock.model.ListFoundationModelsRequest;
+import software.amazon.awssdk.services.bedrock.model.ListFoundationModelsResponse;
 import software.amazon.awssdk.services.bedrockruntime.BedrockRuntimeAsyncClient;
 import software.amazon.awssdk.services.bedrockruntime.model.ContentBlock;
 import software.amazon.awssdk.services.bedrockruntime.model.ConversationRole;
@@ -25,11 +29,15 @@ public class Bedrock {
                 .region(Region.US_EAST_1)
                 .build();
 
-//        BedrockClient bedrockClient = BedrockClient.builder()
-//                .credentialsProvider(DefaultCredentialsProvider.create())
-//                .region(Region.US_EAST_1)
-//                .build();
-//        bedrockClient.listFoundationModels()
+        BedrockClient bedrockClient = BedrockClient.builder()
+                .credentialsProvider(DefaultCredentialsProvider.create())
+                .region(Region.US_EAST_1)
+                .build();
+        ListFoundationModelsResponse models = bedrockClient.listFoundationModels(ListFoundationModelsRequest.builder().build());
+        for (FoundationModelSummary summary : models.modelSummaries()) {
+            summary.responseStreamingSupported();
+            System.out.println(summary.modelName() + "\n " + summary.modelId() + "\n " + summary.modelArn());
+        }
     }
 
     public void execute(Conversation conversation) {

@@ -53,7 +53,7 @@ public class AiExecutor {
                 }
             }
 
-            // TODO Find script. Format text. Pass to LLM.
+            // TODO Find script. Format message text. Pass to LLM.
             conversation.getScript();
 
             // TODO Verify model and other fields
