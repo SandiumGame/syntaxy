@@ -3,15 +3,15 @@
         <model provider="bedrock" name="Claude 3" id="anthropic.claude-3-haiku*" inputCost="3.0" outputCost="15.0"/>
 
         <modelAlias provider="bedrock" name="Claude 3" alias="Programming"/>
+        <modelAlias provider="bedrock" name="Claude 3" alias="General"/>
     </models>
-    <agent id="main" type="router" model="">
+    <agent id="main" type="router" model="General" description="Routes the users query to the appropriate agent">
         <system>
-            Question
+            For the following prompt decide witch agent to route the task to.
 
-            <include id="">Optional description</include>
-            <include groupName=""/> <!--Desciption not allowed-->
+            <include id="agentX" description="Description of what the agent can handle"/>
+            <include groupName="MainAgents"/>
         </system>
-
         <userPrompt/>
     </agent>
 </config>
