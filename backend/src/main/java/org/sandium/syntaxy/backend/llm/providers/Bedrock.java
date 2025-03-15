@@ -36,7 +36,7 @@ public class Bedrock {
         ListFoundationModelsResponse models = bedrockClient.listFoundationModels(ListFoundationModelsRequest.builder().build());
         for (FoundationModelSummary summary : models.modelSummaries()) {
             summary.responseStreamingSupported();
-            System.out.println(summary.modelName() + "\n " + summary.modelId() + "\n " + summary.modelArn());
+//            System.out.println(summary.modelName() + "\n " + summary.modelId() + "\n " + summary.modelArn());
         }
     }
 

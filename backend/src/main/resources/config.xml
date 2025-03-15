@@ -1,9 +1,9 @@
 <config>
-    <models>
-        <model provider="bedrock" name="Claude 3" id="anthropic.claude-3-haiku*" inputCost="3.0" outputCost="15.0"/>
+    <models provider="bedrock">
+        <model name="Claude 3" id="anthropic.claude-3-haiku*" inputCost="3.0" outputCost="15.0"/>
 
-        <modelAlias provider="bedrock" name="Claude 3" alias="Programming"/>
-        <modelAlias provider="bedrock" name="Claude 3" alias="General"/>
+        <modelAlias name="Claude 3" alias="Programming"/>
+        <modelAlias name="Claude 3" alias="General"/>
     </models>
     <agent id="main" type="router" model="General" description="Routes the users query to the appropriate agent">
         <system>
@@ -12,6 +12,8 @@
             <include id="agentX" description="Description of what the agent can handle"/>
             <include groupName="MainAgents"/>
         </system>
-        <userPrompt/>
+        <prompt>
+            <userPrompt/>
+        </prompt>
     </agent>
 </config>
