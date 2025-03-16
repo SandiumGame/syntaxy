@@ -6,12 +6,14 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import java.io.InputStream;
+import java.util.Map;
 
 public class ConfigXmlParser {
 
     private final InputStream xml;
     private final Config config;
     private XMLStreamReader reader;
+    private String currentProvider;
 
     public ConfigXmlParser(InputStream xml, Config config) {
         this.xml = xml;
@@ -23,27 +25,8 @@ public class ConfigXmlParser {
             XMLInputFactory factory = XMLInputFactory.newInstance();
             reader = factory.createXMLStreamReader(xml);
 
-            // Read <config>
-            while (reader.hasNext()) {
-                int event = reader.next();
-                switch (event) {
-                    case XMLStreamConstants.START_ELEMENT:
-                        if (!"config".equals(reader.getLocalName())) {
-                            error("Expected <config>");
-                        }
-
-                        parseConfigElement();
-                        break;
-                    case XMLStreamConstants.END_ELEMENT:
-                        if (!"config".equals(reader.getLocalName())) {
-                            error("Expected </config>");
-                        }
-                        break;
-                    case XMLStreamConstants.CHARACTERS:
-                        verifyNoText();
-                        break;
-                }
-            }
+            parseChildren(null, Map.of(
+                    "config", this::parseConfigElement));
         } catch (Exception e) {
             // TODO Need to handle errors
             e.printStackTrace();
@@ -59,6 +42,68 @@ public class ConfigXmlParser {
         }
     }
 
+    private void parseConfigElement() throws XMLStreamException {
+        verifyNoAttributes();
+
+        parseChildren(null, Map.of(
+                "models", this::parseModelsElement,
+                "agent", this::parseAgentElement));
+    }
+
+    private void parseModelsElement() throws XMLStreamException {
+        verifyAttributes("provider");
+
+        currentProvider = getAttribute("provider");
+
+        parseChildren(null, Map.of(
+                "model", this::parseModelElement,
+                "modelAlias", this::parseModelAliasElement));
+
+        currentProvider = null;
+    }
+
+    private void parseModelElement() throws XMLStreamException {
+        // TODO Read attributes
+
+        verifyNoChildElements();
+    }
+
+    private void parseModelAliasElement() throws XMLStreamException {
+        // TODO Read attributes
+
+        verifyNoChildElements();
+    }
+
+    private void parseAgentElement() throws XMLStreamException {
+        // TODO Read attributes
+
+        parseChildren(null, Map.of(
+                "system", () -> parsePrompt(true),
+                "prompt", () -> parsePrompt(false)));
+    }
+
+    private void parsePrompt(boolean systemPrompt) throws XMLStreamException {
+        // TODO Read attributes
+
+        parseChildren(text -> {
+                // TODO Parse text
+            }, Map.of(
+                "include", this::parseInclude,
+                "userPrompt", this::parseUserPrompt));
+    }
+
+    private void parseInclude() throws XMLStreamException {
+        // TODO Read attributes
+
+        verifyNoChildElements();
+    }
+
+    private void parseUserPrompt() throws XMLStreamException {
+        // TODO Read attributes
+
+        verifyNoChildElements();
+    }
+
     private void error(String error) {
         Location location = reader.getLocation();
         throw new RuntimeException(error + " at line %s column %s.".formatted(location.getLineNumber(), location.getColumnNumber()));
@@ -70,7 +115,7 @@ public class ConfigXmlParser {
         }
     }
 
-    private void verifyCloseTagNext() throws XMLStreamException {
+    private void verifyNoChildElements() throws XMLStreamException {
         while (reader.hasNext()) {
             int event = reader.next();
             switch (event) {
@@ -80,156 +125,71 @@ public class ConfigXmlParser {
                 case XMLStreamConstants.END_ELEMENT:
                     return;
                 case XMLStreamConstants.CHARACTERS:
-                    verifyNoText();
+                    String text = reader.getText().trim();
+                    if (!text.isEmpty()) {
+                        error("Unexpected text \"%s\"".formatted(text));
+                    }
                     break;
             }
         }
     }
 
-    private void verifyNoText() {
-        String text = reader.getText().trim();
-        if (!text.isEmpty()) {
-            error("Unexpected text \"%s\"".formatted(text));
+    private void verifyAttributes(String ...names) {
+        int count = reader.getAttributeCount();
+
+        nextAttribute:
+        for (int i=0; i < count; i++) {
+            String name = reader.getAttributeLocalName(i);
+            for (String n : names) {
+                if (n.equals(name)) {
+                    continue nextAttribute;
+                }
+            }
+
+            error("Unexpected attribute \"%s\"".formatted(name));
         }
     }
 
-    private void parseConfigElement() throws XMLStreamException {
-        verifyNoAttributes();
+    private String getAttribute(String name) {
+        String value = reader.getAttributeValue(null, name);
+        if (value == null) {
+            error("Expected attribute \"%s\"".formatted(name));
+        }
+        return value;
+    }
+
+    private void parseChildren(TextElementProcessor textProcessor, Map<String,ElementProcessor> processors) throws XMLStreamException {
         while (reader.hasNext()) {
             int event = reader.next();
             switch (event) {
                 case XMLStreamConstants.START_ELEMENT:
                     String name = reader.getLocalName();
-                    switch (name) {
-                        case "models":
-                            parseModelsElement();
-                            break;
-                        case "agent":
-                            parseAgentElement();
-                            break;
-                        default:
-                            error("Unexpected element <%s>".formatted(name));
-                            break;
+                    ElementProcessor processor = processors.get(name);
+                    if (processor == null) {
+                        error("Unexpected element <%s>".formatted(name));
+                    } else {
+                        processor.processElement();
                     }
                     break;
                 case XMLStreamConstants.END_ELEMENT:
                     return;
                 case XMLStreamConstants.CHARACTERS:
-                    verifyNoText();
-                    break;
-            }
-        }
-    }
-
-    private void parseModelsElement() throws XMLStreamException {
-        verifyNoAttributes();
-
-        while (reader.hasNext()) {
-            int event = reader.next();
-            switch (event) {
-                case XMLStreamConstants.START_ELEMENT:
-                    String name = reader.getLocalName();
-                    switch (name) {
-                        case "model":
-                            parseModelElement();
-                            break;
-                        case "modelAlias":
-                            parseModelAliasElement();
-                            break;
-                        default:
-                            error("Unexpected element <%s>".formatted(name));
-                            break;
+                    String text = reader.getText().trim();
+                    if (textProcessor != null) {
+                        textProcessor.processText(text);
+                    } else if (!text.isEmpty()) {
+                        error("Unexpected text \"%s\"".formatted(text));
                     }
                     break;
-                case XMLStreamConstants.END_ELEMENT:
-                    return;
-                case XMLStreamConstants.CHARACTERS:
-                    verifyNoText();
-                    break;
             }
         }
     }
 
-    private void parseModelElement() throws XMLStreamException {
-        // TODO Read attributes
-
-        verifyCloseTagNext();
+    private interface ElementProcessor {
+        void processElement() throws XMLStreamException;
     }
 
-    private void parseModelAliasElement() throws XMLStreamException {
-        // TODO Read attributes
-
-        verifyCloseTagNext();
+    private interface TextElementProcessor {
+        void processText(String text) throws XMLStreamException;
     }
-
-    private void parseAgentElement() throws XMLStreamException {
-        // TODO Read attributes
-
-        while (reader.hasNext()) {
-            int event = reader.next();
-            switch (event) {
-                case XMLStreamConstants.START_ELEMENT:
-                    String name = reader.getLocalName();
-                    switch (name) {
-                        case "system":
-                            parsePrompt(true);
-                            break;
-                        case "prompt":
-                            parsePrompt(false);
-                            break;
-                        default:
-                            error("Unexpected element <%s>".formatted(name));
-                            break;
-                    }
-                    break;
-                case XMLStreamConstants.END_ELEMENT:
-                    return;
-                case XMLStreamConstants.CHARACTERS:
-                    verifyNoText();
-                    break;
-            }
-        }
-    }
-
-    private void parsePrompt(boolean systemPrompt) throws XMLStreamException {
-        // TODO Read attributes
-
-        while (reader.hasNext()) {
-            int event = reader.next();
-            switch (event) {
-                case XMLStreamConstants.START_ELEMENT:
-                    String name = reader.getLocalName();
-                    switch (name) {
-                        case "include":
-                            parseInclude();
-                            break;
-                        case "userPrompt":
-                            parseUserPrompt();
-                            break;
-                        default:
-                            error("Unexpected element <%s>".formatted(name));
-                            break;
-                    }
-                    break;
-                case XMLStreamConstants.END_ELEMENT:
-                    return;
-                case XMLStreamConstants.CHARACTERS:
-                    // TODO Parse text
-                    break;
-            }
-        }
-    }
-
-    private void parseInclude() throws XMLStreamException {
-        // TODO Read attributes
-
-        verifyCloseTagNext();
-    }
-
-    private void parseUserPrompt() throws XMLStreamException {
-        // TODO Read attributes
-
-        verifyCloseTagNext();
-    }
-
 }

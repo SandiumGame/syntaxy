@@ -5,7 +5,7 @@
         <modelAlias name="Claude 3" alias="Programming"/>
         <modelAlias name="Claude 3" alias="General"/>
     </models>
-    <agent id="main" type="router" model="General" description="Routes the users query to the appropriate agent">
+    <agent id="main" type="router" model="General" title="Main Query Router" description="Routes the users query to the appropriate agent">
         <system>
             For the following prompt decide witch agent to route the task to.
 
