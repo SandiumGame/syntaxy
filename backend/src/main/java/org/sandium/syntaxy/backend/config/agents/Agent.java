@@ -1,5 +1,9 @@
 package org.sandium.syntaxy.backend.config.agents;
 
+import org.sandium.syntaxy.backend.ExecutionContext;
+import org.sandium.syntaxy.backend.llm.conversation.Conversation;
+import org.sandium.syntaxy.backend.llm.providers.Bedrock;
+
 public class Agent {
 
     private String id;
@@ -37,5 +41,9 @@ public class Agent {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public void execute(Conversation conversation, ExecutionContext executionContext, Bedrock bedrock) {
+
     }
 }

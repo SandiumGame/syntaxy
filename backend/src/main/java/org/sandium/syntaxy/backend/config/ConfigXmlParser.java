@@ -1,5 +1,8 @@
 package org.sandium.syntaxy.backend.config;
 
+import org.sandium.syntaxy.backend.config.agents.Agent;
+import org.sandium.syntaxy.backend.config.agents.RouterAgent;
+
 import javax.xml.stream.Location;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
@@ -75,18 +78,36 @@ public class ConfigXmlParser {
     }
 
     private void parseAgentElement() throws XMLStreamException {
-        // TODO Read attributes
+        verifyAttributes("id", "type", "model", "title", "description");
+        String type = getAttribute("type");
+        Agent agent;
+        switch (type) {
+            case "router":
+                agent = new RouterAgent();
+                break;
+            default:
+                error("Invalid agent type \"%s\"".formatted(type));
+                return;
+        }
+
+        agent.setId(getAttribute("id"));
+        agent.setModel(getAttribute("model"));
+        agent.setTitle(getAttribute("title", null));
+        agent.setDescription(getAttribute("description", null));
 
         parseChildren(null, Map.of(
                 "system", () -> parsePrompt(true),
                 "prompt", () -> parsePrompt(false)));
+
+        config.addAgent(agent);
     }
 
     private void parsePrompt(boolean systemPrompt) throws XMLStreamException {
         // TODO Read attributes
 
         parseChildren(text -> {
-                // TODO Parse text
+                // Remove whitespace from start of lines
+                System.out.println(reader.getTextStart() + " " + text);
             }, Map.of(
                 "include", this::parseInclude,
                 "userPrompt", this::parseUserPrompt));
@@ -158,6 +179,14 @@ public class ConfigXmlParser {
         return value;
     }
 
+    private String getAttribute(String name, String defaultValue) {
+        String value = reader.getAttributeValue(null, name);
+        if (value == null) {
+            return defaultValue;
+        }
+        return value;
+    }
+
     private void parseChildren(TextElementProcessor textProcessor, Map<String,ElementProcessor> processors) throws XMLStreamException {
         while (reader.hasNext()) {
             int event = reader.next();
@@ -174,10 +203,10 @@ public class ConfigXmlParser {
                 case XMLStreamConstants.END_ELEMENT:
                     return;
                 case XMLStreamConstants.CHARACTERS:
-                    String text = reader.getText().trim();
+                    String text = reader.getText();
                     if (textProcessor != null) {
                         textProcessor.processText(text);
-                    } else if (!text.isEmpty()) {
+                    } else if (!reader.isWhiteSpace()) {
                         error("Unexpected text \"%s\"".formatted(text));
                     }
                     break;

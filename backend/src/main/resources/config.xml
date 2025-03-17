@@ -3,11 +3,14 @@
         <model name="Claude 3" id="anthropic.claude-3-haiku*" inputCost="3.0" outputCost="15.0"/>
 
         <modelAlias name="Claude 3" alias="Programming"/>
-        <modelAlias name="Claude 3" alias="General"/>
+        <modelAlias name="Claude 3" alias="Router"/>
     </models>
-    <agent id="main" type="router" model="General" title="Main Query Router" description="Routes the users query to the appropriate agent">
+    <agent id="main" type="router" model="Router" title="Main Query Router" description="Routes the users query to the appropriate agent">
         <system>
-            For the following prompt decide witch agent to route the task to.
+            For the user prompt decide witch LLM agent is best able to handle this task.
+            &nbsp;Only choose one agent.
+            Only output the number of the agent.
+            Do not output anything else.
 
             <include id="agentX" description="Description of what the agent can handle"/>
             <include groupName="MainAgents"/>

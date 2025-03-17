@@ -2,6 +2,7 @@ package org.sandium.syntaxy.backend;
 
 import org.sandium.syntaxy.backend.config.Config;
 import org.sandium.syntaxy.backend.config.ConfigXmlParser;
+import org.sandium.syntaxy.backend.config.agents.Agent;
 import org.sandium.syntaxy.backend.llm.Model;
 import org.sandium.syntaxy.backend.llm.conversation.Conversation;
 import org.sandium.syntaxy.backend.llm.conversation.Message;
@@ -53,12 +54,18 @@ public class AiExecutor {
                 }
             }
 
+
             // TODO Find script. Format message text. Pass to LLM.
-            conversation.getScript();
+            Agent agent = config.getAgent(conversation.getScript());
+            if (agent == null) {
+                // TODO Handle bad agent. Should really happen
+            }
+
+            agent.execute(conversation, executionContext, bedrock);
 
             // TODO Verify model and other fields
 
-            bedrock.execute(conversation);
+            // bedrock.execute(conversation);
 
             // TODO Process results. i.e. What script if any to run next
 

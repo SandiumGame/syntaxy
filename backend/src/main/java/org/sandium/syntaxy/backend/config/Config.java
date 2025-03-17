@@ -7,7 +7,7 @@ import java.util.Map;
 
 public class Config {
 
-    public Map<String, Agent> agents;
+    private Map<String, Agent> agents;
 
     public Config() {
         this.agents = new HashMap<>();
@@ -15,5 +15,9 @@ public class Config {
 
     public void addAgent(Agent agent) {
         agents.put(agent.getId(), agent);
+    }
+
+    public Agent getAgent(String id) {
+        return agents.get(id);
     }
 }
