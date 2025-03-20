@@ -8,7 +8,10 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 public class ConfigXmlParser {
@@ -18,8 +21,15 @@ public class ConfigXmlParser {
     private XMLStreamReader reader;
     private String currentProvider;
 
-    public ConfigXmlParser(InputStream xml, Config config) {
-        this.xml = xml;
+    public ConfigXmlParser(InputStream xml, Config config) throws IOException {
+        String text = new String(xml.readAllBytes(), StandardCharsets.UTF_8)
+                .replace("&nbsp;", "&#160;")
+                .replace("&lt;", "&#60;")
+                .replace("&gt;", "&#62;")
+                .replace("&amp;", "&#38;")
+                .replace("&quot;", "&#34;")
+                .replace("&apos;", "&#39;");
+        this.xml = new ByteArrayInputStream(text.getBytes(StandardCharsets.UTF_8));
         this.config = config;
     }
 
@@ -28,11 +38,9 @@ public class ConfigXmlParser {
             XMLInputFactory factory = XMLInputFactory.newInstance();
             reader = factory.createXMLStreamReader(xml);
 
-            parseChildren(null, Map.of(
-                    "config", this::parseConfigElement));
+            parseChildren(null, Map.of("config", this::parseConfigElement));
         } catch (Exception e) {
-            // TODO Need to handle errors
-            e.printStackTrace();
+            throw new RuntimeException(e);
         } finally {
             try {
                 if (reader != null) {

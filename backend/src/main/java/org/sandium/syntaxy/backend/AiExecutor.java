@@ -8,6 +8,8 @@ import org.sandium.syntaxy.backend.llm.conversation.Conversation;
 import org.sandium.syntaxy.backend.llm.conversation.Message;
 import org.sandium.syntaxy.backend.llm.providers.Bedrock;
 
+import java.io.IOException;
+
 public class AiExecutor {
 
     // TODO Needs to come from file
@@ -31,9 +33,14 @@ public class AiExecutor {
     private Model model = new Model("anthropic.claude-3-haiku-20240307-v1:0", INPUT_TOKEN_COST, OUTPUT_TOKEN_COST);
 
     public AiExecutor() {
-        Config config = new Config();
-        ConfigXmlParser parser = new ConfigXmlParser(AiExecutor.class.getResourceAsStream("/config.xml"), config);
-        parser.parse();
+        config = new Config();
+        try {
+            ConfigXmlParser parser = new ConfigXmlParser(AiExecutor.class.getResourceAsStream("/config.xml"), config);
+            parser.parse();
+        } catch (Exception e) {
+            // TODO Need to handle errors
+            throw new RuntimeException(e);
+        }
 
         bedrock = new Bedrock();
     }
@@ -53,7 +60,6 @@ public class AiExecutor {
                     throw new RuntimeException("Message type can not be null.");
                 }
             }
-
 
             // TODO Find script. Format message text. Pass to LLM.
             Agent agent = config.getAgent(conversation.getScript());
