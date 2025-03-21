@@ -117,11 +117,11 @@ public class ConfigXmlParser {
                 // Remove whitespace from start of lines
                 System.out.println(reader.getTextStart() + " " + text);
             }, Map.of(
-                "include", this::parseInclude,
+                "routes", this::parseRoutes,
                 "userPrompt", this::parseUserPrompt));
     }
 
-    private void parseInclude() throws XMLStreamException {
+    private void parseRoutes() throws XMLStreamException {
         // TODO Read attributes
 
         verifyNoChildElements();
