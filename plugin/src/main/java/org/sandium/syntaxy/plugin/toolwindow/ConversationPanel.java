@@ -8,7 +8,7 @@ import org.sandium.syntaxy.backend.ExecutionContext;
 import org.sandium.syntaxy.backend.llm.conversation.Conversation;
 import org.sandium.syntaxy.backend.llm.conversation.ConversationListener;
 import org.sandium.syntaxy.backend.llm.conversation.Message;
-import org.sandium.syntaxy.backend.llm.conversation.MessageType;
+import org.sandium.syntaxy.backend.config.prompt.PromptType;
 import org.sandium.syntaxy.plugin.core.AiService;
 
 import javax.swing.*;
@@ -67,11 +67,9 @@ public class ConversationPanel {
     public void submit(String userQuery, ExecutionContext executionContext) {
         AiExecutor executor = aiService.getAiExecutor();
 
-        Message message = conversation.addMessage();
-        message.setMessageType(MessageType.USER);
-        message.setContent(userQuery);
+        executionContext.setUserQuery(userQuery);
 
-        conversation.setScript("main");
+        conversation.setScript("GeneralQueryAgent");
         conversation.setModel(executor.getDefaultModel());
         executor.execute(conversation, executionContext);
     }

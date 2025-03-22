@@ -1,8 +1,12 @@
 package org.sandium.syntaxy.backend.config.agents;
 
 import org.sandium.syntaxy.backend.ExecutionContext;
+import org.sandium.syntaxy.backend.config.prompt.Prompt;
 import org.sandium.syntaxy.backend.llm.conversation.Conversation;
 import org.sandium.syntaxy.backend.llm.providers.Bedrock;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Agent {
 
@@ -10,6 +14,11 @@ public class Agent {
     private String model;
     private String title;
     private String description;
+    private final List<Prompt> prompts;
+
+    public Agent() {
+        prompts = new ArrayList<>();
+    }
 
     public String getId() {
         return id;
@@ -43,7 +52,20 @@ public class Agent {
         this.description = description;
     }
 
+    public List<Prompt> getPrompts() {
+        return prompts;
+    }
+
     public void execute(Conversation conversation, ExecutionContext executionContext, Bedrock bedrock) {
 
+        // TODO process output callback
+
+        System.out.println("Debug 1");
     }
+
+    public void generatePrompt(Conversation conversation, ExecutionContext executionContext) {
+        // TODO Add all prompts to conversation (only if conversation empty?)
+
+    }
+
 }

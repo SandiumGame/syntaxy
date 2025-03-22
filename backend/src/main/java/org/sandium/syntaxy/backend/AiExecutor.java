@@ -51,10 +51,6 @@ public class AiExecutor {
 
     public void execute(Conversation conversation, ExecutionContext executionContext) {
         new Thread(() -> {
-            int size = conversation.getMessages().size();
-            if (size == 0) {
-                throw new RuntimeException("Conversation does not have any messages.");
-            }
             for (Message message : conversation.getMessages()) {
                 if (message.getMessageType() == null) {
                     throw new RuntimeException("Message type can not be null.");
@@ -65,6 +61,7 @@ public class AiExecutor {
             Agent agent = config.getAgent(conversation.getScript());
             if (agent == null) {
                 // TODO Handle bad agent. Should really happen
+                return;
             }
 
             agent.execute(conversation, executionContext, bedrock);

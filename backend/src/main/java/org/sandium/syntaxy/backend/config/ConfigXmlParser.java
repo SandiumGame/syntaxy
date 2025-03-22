@@ -1,7 +1,11 @@
 package org.sandium.syntaxy.backend.config;
 
 import org.sandium.syntaxy.backend.config.agents.Agent;
-import org.sandium.syntaxy.backend.config.agents.RouterAgent;
+import org.sandium.syntaxy.backend.config.prompt.Prompt;
+import org.sandium.syntaxy.backend.config.prompt.PromptType;
+import org.sandium.syntaxy.backend.config.prompt.TextSnippet;
+import org.sandium.syntaxy.backend.config.prompt.UserLocaleSnippet;
+import org.sandium.syntaxy.backend.config.prompt.UserQuerySnippet;
 
 import javax.xml.stream.Location;
 import javax.xml.stream.XMLInputFactory;
@@ -86,51 +90,49 @@ public class ConfigXmlParser {
     }
 
     private void parseAgentElement() throws XMLStreamException {
-        verifyAttributes("id", "type", "model", "title", "description");
-        String type = getAttribute("type");
-        Agent agent;
-        switch (type) {
-            case "router":
-                agent = new RouterAgent();
-                break;
-            default:
-                error("Invalid agent type \"%s\"".formatted(type));
-                return;
-        }
-
+        verifyAttributes("id", "group", "model", "title", "description");
+        Agent agent = new Agent();
         agent.setId(getAttribute("id"));
         agent.setModel(getAttribute("model"));
         agent.setTitle(getAttribute("title", null));
         agent.setDescription(getAttribute("description", null));
 
         parseChildren(null, Map.of(
-                "system", () -> parsePrompt(true),
-                "prompt", () -> parsePrompt(false)));
+                "system", () -> parsePrompt(agent, PromptType.SYSTEM),
+                "prompt", () -> parsePrompt(agent, PromptType.USER)));
 
         config.addAgent(agent);
     }
 
-    private void parsePrompt(boolean systemPrompt) throws XMLStreamException {
+    private void parsePrompt(Agent agent, PromptType promptType) throws XMLStreamException {
         // TODO Read attributes
+
+        Prompt prompt = new Prompt(promptType);
+        agent.getPrompts().add(prompt);
 
         parseChildren(text -> {
-                // Remove whitespace from start of lines
-                System.out.println(reader.getTextStart() + " " + text);
+                prompt.getSnippets().add(new TextSnippet(text));
             }, Map.of(
-                "routes", this::parseRoutes,
-                "userPrompt", this::parseUserPrompt));
+                "routes", () -> parseRoutes(prompt),
+                "userQuery", () -> parseUserQuery(prompt),
+                "userLocale", () -> parseUserLocale(prompt)));
     }
 
-    private void parseRoutes() throws XMLStreamException {
+    private void parseRoutes(Prompt prompt) throws XMLStreamException {
         // TODO Read attributes
-
         verifyNoChildElements();
     }
 
-    private void parseUserPrompt() throws XMLStreamException {
-        // TODO Read attributes
-
+    private void parseUserQuery(Prompt prompt) throws XMLStreamException {
+        verifyNoAttributes();
         verifyNoChildElements();
+        prompt.getSnippets().add(new UserQuerySnippet());
+    }
+
+    private void parseUserLocale(Prompt prompt) throws XMLStreamException {
+        verifyNoAttributes();
+        verifyNoChildElements();
+        prompt.getSnippets().add(new UserLocaleSnippet());
     }
 
     private void error(String error) {

@@ -2,7 +2,7 @@ package org.sandium.syntaxy.backend.llm.providers;
 
 import org.sandium.syntaxy.backend.llm.conversation.Conversation;
 import org.sandium.syntaxy.backend.llm.conversation.Message;
-import org.sandium.syntaxy.backend.llm.conversation.MessageType;
+import org.sandium.syntaxy.backend.config.prompt.PromptType;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.bedrock.BedrockClient;
@@ -45,20 +45,20 @@ public class Bedrock {
         ArrayList<SystemContentBlock> systemMessages = new ArrayList<>();
         ArrayList<software.amazon.awssdk.services.bedrockruntime.model.Message> bedrockMessages = new ArrayList<>();
         for (Message message : messages) {
-            if (message.getMessageType() == MessageType.SYSTEM) {
+            if (message.getMessageType() == PromptType.SYSTEM) {
                 systemMessages.add(SystemContentBlock.builder()
                         .text(message.getContent())
                         .build());
             } else {
                 bedrockMessages.add(software.amazon.awssdk.services.bedrockruntime.model.Message.builder()
                         .content(ContentBlock.fromText(message.getContent()))
-                        .role(message.getMessageType() == MessageType.USER ? ConversationRole.USER : ConversationRole.ASSISTANT)
+                        .role(message.getMessageType() == PromptType.USER ? ConversationRole.USER : ConversationRole.ASSISTANT)
                         .build());
             }
         }
 
         Message response = conversation.addMessage();
-        response.setMessageType(MessageType.ASSISTANT);
+        response.setMessageType(PromptType.ASSISTANT);
 
         var responseStreamHandler = ConverseStreamResponseHandler.builder()
                 .subscriber(ConverseStreamResponseHandler.Visitor.builder()

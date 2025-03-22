@@ -1,5 +1,7 @@
 package org.sandium.syntaxy.backend.llm.conversation;
 
+import org.sandium.syntaxy.backend.config.prompt.PromptType;
+
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -7,7 +9,7 @@ public class Message {
 
     private final Conversation conversation;
     private Collection<MessageListener> listeners;
-    private MessageType messageType;
+    private PromptType promptType;
     private final StringBuilder content;
 
     public Message(Conversation conversation) {
@@ -20,12 +22,12 @@ public class Message {
         listeners.add(listener);
     }
 
-    public MessageType getMessageType() {
-        return messageType;
+    public PromptType getMessageType() {
+        return promptType;
     }
 
-    public void setMessageType(MessageType messageType) {
-        this.messageType = messageType;
+    public void setMessageType(PromptType promptType) {
+        this.promptType = promptType;
     }
 
     public String getContent() {
