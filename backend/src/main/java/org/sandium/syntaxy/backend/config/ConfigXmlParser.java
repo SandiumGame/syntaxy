@@ -105,9 +105,13 @@ public class ConfigXmlParser {
     }
 
     private void parsePrompt(Agent agent, PromptType promptType) throws XMLStreamException {
-        // TODO Read attributes
+        verifyAttributes("onInitialConversation", "onContinuedConversation", "keepInConversation");
 
-        Prompt prompt = new Prompt(promptType);
+        Prompt prompt = new Prompt();
+        prompt.setType(promptType);
+        prompt.setOnInitialConversation(getBooleanAttribute("onInitialConversation"));
+        prompt.setOnContinuedConversation(getBooleanAttribute("onContinuedConversation"));
+        prompt.setKeepInConversation(getBooleanAttribute("keepInConversation"));
         agent.getPrompts().add(prompt);
 
         parseChildren(text -> {
@@ -195,6 +199,14 @@ public class ConfigXmlParser {
             return defaultValue;
         }
         return value;
+    }
+
+    private boolean getBooleanAttribute(String name) {
+        String value = reader.getAttributeValue(null, name);
+        if (value == null) {
+            error("Expected attribute \"%s\"".formatted(name));
+        }
+        return Boolean.parseBoolean(value);
     }
 
     private void parseChildren(TextElementProcessor textProcessor, Map<String,ElementProcessor> processors) throws XMLStreamException {

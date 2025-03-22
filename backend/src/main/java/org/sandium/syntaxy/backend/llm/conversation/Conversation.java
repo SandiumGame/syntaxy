@@ -4,11 +4,14 @@ import org.sandium.syntaxy.backend.llm.Model;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Conversation {
 
     private final Collection<ConversationListener> listeners;
     private final ArrayList<Message> messages;
+    private final Set<String> agents;
     private String script;
     private Model model;
     private long amountSpentNanos;
@@ -17,6 +20,7 @@ public class Conversation {
     public Conversation() {
         this.listeners = new ArrayList<>();
         messages = new ArrayList<>();
+        agents = new HashSet<>();
     }
 
     public ArrayList<Message> getMessages() {
@@ -36,6 +40,14 @@ public class Conversation {
 
     public void addListener(ConversationListener listener) {
         listeners.add(listener);
+    }
+
+    public void addAgent(String id) {
+        agents.add(id);
+    }
+
+    public boolean containsAgent(String id) {
+        return agents.contains(id);
     }
 
     public String getScript() {

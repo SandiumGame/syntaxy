@@ -7,17 +7,17 @@
         <modelAlias name="Claude 3" alias="Router"/>
     </models>
     <agent id="MainRouter" model="Router" title="Main" description="Routes the users query to the appropriate agent">
-        <system>
+        <system onInitialConversation="true" onContinuedConversation="false" keepInConversation="true">
             For the user prompt decide witch LLM agent is best able to handle this task.
             &nbsp;Only choose one agent. Only output the name of the agent. Do not output anything else.
 
             <routes groupName="MainAgents"/>
         </system>
-        <prompt>
+        <prompt onInitialConversation="true" onContinuedConversation="true" keepInConversation="true">
             <userQuery/>
         </prompt>
     </agent>
-    <agent id="GeneralQueryAgent" group="MainAgents" model="General Query" title="General Query" description="Answers general queries">
+    <agent id="GeneralQueryAgent" group="MainAgents" model="General" title="General Query" description="Answers general queries">
         <system onInitialConversation="true" onContinuedConversation="false" keepInConversation="true">
             Answer the following query in <userLocale/>.
         </system>
@@ -28,11 +28,11 @@
         <!-- TODO Agent to run if user enters another prompt (default is this one) -->
     </agent>
     <agent id="ProgrammingAgent" group="MainAgents" model="Programmer" title="General Question" description="Answers general questions">
-        <system>
+        <system onInitialConversation="true" onContinuedConversation="false" keepInConversation="true">
             <!-- TODO Include open tabs -->
             <!-- TODO Include programming rules -->
         </system>
-        <prompt>
+        <prompt onInitialConversation="true" onContinuedConversation="true" keepInConversation="true">
             <userQuery/>
         </prompt>
         <!-- TODO Apply patch -->
