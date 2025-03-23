@@ -19,7 +19,7 @@ import software.amazon.awssdk.services.bedrockruntime.model.TokenUsage;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 
-public class Bedrock {
+public class Bedrock extends BaseProvider {
 
     private final BedrockRuntimeAsyncClient client;
 

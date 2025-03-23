@@ -2,8 +2,10 @@ package org.sandium.syntaxy.backend.config.agents;
 
 import org.sandium.syntaxy.backend.ExecutionContext;
 import org.sandium.syntaxy.backend.config.prompt.Prompt;
+import org.sandium.syntaxy.backend.config.prompt.Snippet;
 import org.sandium.syntaxy.backend.llm.conversation.Conversation;
-import org.sandium.syntaxy.backend.llm.providers.Bedrock;
+import org.sandium.syntaxy.backend.llm.conversation.Message;
+import org.sandium.syntaxy.backend.llm.providers.BaseProvider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,15 +58,31 @@ public class Agent {
         return prompts;
     }
 
-    public void execute(Conversation conversation, ExecutionContext executionContext, Bedrock bedrock) {
+    public void execute(Conversation conversation, ExecutionContext executionContext, BaseProvider provider) {
 
         // TODO process output callback
+        generatePrompts(conversation, executionContext);
+//        conversation.setModel();
 
-        System.out.println("Debug 1");
+        // provider.execute(conversation);
     }
 
-    public void generatePrompt(Conversation conversation, ExecutionContext executionContext) {
-        // TODO Add all prompts to conversation (only if conversation empty?)
+    public void generatePrompts(Conversation conversation, ExecutionContext executionContext) {
+        boolean continuedConversation = conversation.containsAgent(id) && (!conversation.getMessages().isEmpty());
+        for (Prompt prompt : prompts) {
+            if ((!continuedConversation && prompt.isOnInitialConversation())
+                    || (continuedConversation && prompt.isOnContinuedConversation())) {
+
+                StringBuilder builder = new StringBuilder();
+                for (Snippet snippet : prompt.getSnippets()) {
+                    builder.append(snippet.getText(executionContext));
+                }
+
+                Message message = conversation.addMessage();
+                message.setMessageType(prompt.getType());
+                message.setContent(builder.toString());
+            }
+        }
 
     }
 

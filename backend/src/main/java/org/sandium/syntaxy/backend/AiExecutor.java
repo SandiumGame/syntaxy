@@ -6,6 +6,7 @@ import org.sandium.syntaxy.backend.config.agents.Agent;
 import org.sandium.syntaxy.backend.llm.Model;
 import org.sandium.syntaxy.backend.llm.conversation.Conversation;
 import org.sandium.syntaxy.backend.llm.conversation.Message;
+import org.sandium.syntaxy.backend.llm.providers.BaseProvider;
 import org.sandium.syntaxy.backend.llm.providers.Bedrock;
 
 import java.io.IOException;
@@ -29,7 +30,7 @@ public class AiExecutor {
      */
 
     private Config config;
-    private Bedrock bedrock;
+    private BaseProvider provider;
     private Model model = new Model("anthropic.claude-3-haiku-20240307-v1:0", INPUT_TOKEN_COST, OUTPUT_TOKEN_COST);
 
     public AiExecutor() {
@@ -42,7 +43,7 @@ public class AiExecutor {
             throw new RuntimeException(e);
         }
 
-        bedrock = new Bedrock();
+        provider = new Bedrock();
     }
 
     public Model getDefaultModel() {
@@ -64,7 +65,7 @@ public class AiExecutor {
                 return;
             }
 
-            agent.execute(conversation, executionContext, bedrock);
+            agent.execute(conversation, executionContext, provider);
 
             // TODO Verify model and other fields
 

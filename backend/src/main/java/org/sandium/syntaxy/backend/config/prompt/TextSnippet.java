@@ -1,5 +1,7 @@
 package org.sandium.syntaxy.backend.config.prompt;
 
+import org.sandium.syntaxy.backend.ExecutionContext;
+
 public class TextSnippet extends Snippet {
 
     private final String text;
@@ -11,6 +13,11 @@ public class TextSnippet extends Snippet {
     }
 
     public String getText() {
+        return text;
+    }
+
+    @Override
+    public String getText(ExecutionContext executionContext) {
         return text;
     }
 }
