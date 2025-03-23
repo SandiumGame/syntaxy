@@ -1,6 +1,7 @@
 package org.sandium.syntaxy.backend.config;
 
 import org.sandium.syntaxy.backend.config.agents.Agent;
+import org.sandium.syntaxy.backend.config.prompt.ListRoutesSnippet;
 import org.sandium.syntaxy.backend.config.prompt.Prompt;
 import org.sandium.syntaxy.backend.config.prompt.PromptType;
 import org.sandium.syntaxy.backend.config.prompt.TextSnippet;
@@ -91,8 +92,9 @@ public class ConfigXmlParser {
 
     private void parseAgentElement() throws XMLStreamException {
         verifyAttributes("id", "group", "model", "title", "description");
-        Agent agent = new Agent();
+        Agent agent = new Agent(config);
         agent.setId(getAttribute("id"));
+        agent.setGroup(getAttribute("group", null));
         agent.setModel(getAttribute("model"));
         agent.setTitle(getAttribute("title", null));
         agent.setDescription(getAttribute("description", null));
@@ -117,13 +119,17 @@ public class ConfigXmlParser {
         parseChildren(text -> {
                 prompt.getSnippets().add(new TextSnippet(text));
             }, Map.of(
-                "routes", () -> parseRoutes(prompt),
+                "listRoutes", () -> parseListRoutes(prompt),
                 "userQuery", () -> parseUserQuery(prompt),
                 "userLocale", () -> parseUserLocale(prompt)));
     }
 
-    private void parseRoutes(Prompt prompt) throws XMLStreamException {
-        // TODO Read attributes
+    private void parseListRoutes(Prompt prompt) throws XMLStreamException {
+        verifyAttributes("group");
+
+        String group = getAttribute("group");
+        prompt.getSnippets().add(new ListRoutesSnippet(group));
+
         verifyNoChildElements();
     }
 

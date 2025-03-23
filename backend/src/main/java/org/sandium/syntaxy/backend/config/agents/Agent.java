@@ -1,6 +1,7 @@
 package org.sandium.syntaxy.backend.config.agents;
 
 import org.sandium.syntaxy.backend.ExecutionContext;
+import org.sandium.syntaxy.backend.config.Config;
 import org.sandium.syntaxy.backend.config.prompt.Prompt;
 import org.sandium.syntaxy.backend.config.prompt.Snippet;
 import org.sandium.syntaxy.backend.llm.conversation.Conversation;
@@ -12,14 +13,21 @@ import java.util.List;
 
 public class Agent {
 
+    private final Config config;
     private String id;
+    private String group;
     private String model;
     private String title;
     private String description;
     private final List<Prompt> prompts;
 
-    public Agent() {
+    public Agent(Config config) {
+        this.config = config;
         prompts = new ArrayList<>();
+    }
+
+    public Config getConfig() {
+        return config;
     }
 
     public String getId() {
@@ -28,6 +36,14 @@ public class Agent {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getGroup() {
+        return group;
+    }
+
+    public void setGroup(String group) {
+        this.group = group;
     }
 
     public String getModel() {
@@ -59,15 +75,14 @@ public class Agent {
     }
 
     public void execute(Conversation conversation, ExecutionContext executionContext, BaseProvider provider) {
-
-        // TODO process output callback
         generatePrompts(conversation, executionContext);
 //        conversation.setModel();
 
-        // provider.execute(conversation);
+        provider.execute(conversation);
+        // TODO process output callback
     }
 
-    public void generatePrompts(Conversation conversation, ExecutionContext executionContext) {
+    private void generatePrompts(Conversation conversation, ExecutionContext executionContext) {
         boolean continuedConversation = conversation.containsAgent(id) && (!conversation.getMessages().isEmpty());
         for (Prompt prompt : prompts) {
             if ((!continuedConversation && prompt.isOnInitialConversation())
@@ -75,15 +90,36 @@ public class Agent {
 
                 StringBuilder builder = new StringBuilder();
                 for (Snippet snippet : prompt.getSnippets()) {
-                    builder.append(snippet.getText(executionContext));
+                    builder.append(snippet.getText(executionContext, config));
                 }
 
                 Message message = conversation.addMessage();
                 message.setMessageType(prompt.getType());
-                message.setContent(builder.toString());
+                message.setContent(formatPrompt(builder));
             }
         }
+    }
 
+    private String formatPrompt(StringBuilder text) {
+        // Remove leading space/newlines
+        while (!text.isEmpty() && text.charAt(0) == ' ' || text.charAt(0) == '\n') {
+            text.delete(0, 1);
+        }
+
+        // Remove trailing space/newlines
+        while (!text.isEmpty() && text.charAt(text.length()-1) == ' ' || text.charAt(text.length()-1) == '\n') {
+            text.delete(text.length()-1, text.length());
+        }
+
+        // Remove whitespace at start of line
+        String s = text.toString();
+        while(s.contains("\n "))
+            s = s.replace("\n ", "\n");
+
+        // Convert non-breaking spaces to spaces
+        s = s.replace('\u00A0', ' ');
+
+        return s;
     }
 
 }

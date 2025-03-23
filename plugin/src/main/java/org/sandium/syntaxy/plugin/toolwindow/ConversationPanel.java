@@ -69,7 +69,7 @@ public class ConversationPanel {
 
         executionContext.setUserQuery(userQuery);
 
-        conversation.setScript("GeneralQueryAgent");
+        conversation.setScript("MainRouter");
         conversation.setModel(executor.getDefaultModel());
         executor.execute(conversation, executionContext);
     }

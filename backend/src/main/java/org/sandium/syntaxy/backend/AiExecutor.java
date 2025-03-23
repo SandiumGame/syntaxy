@@ -14,8 +14,8 @@ import java.io.IOException;
 public class AiExecutor {
 
     // TODO Needs to come from file
-    private final long INPUT_TOKEN_COST = (long)(0.003 / 1000 * 1000000000L);
-    private final long OUTPUT_TOKEN_COST = (long)(0.015 / 1000 * 1000000000L);
+    private final long INPUT_TOKEN_COST = (long)(0.0008 / 1000 * 1000000000L);
+    private final long OUTPUT_TOKEN_COST = (long)(0.004 / 1000 * 1000000000L);
 
     /*
      * Categorize question
