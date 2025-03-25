@@ -44,8 +44,9 @@
         <prompt onInitialConversation="true" onContinuedConversation="true" keepInConversation="true">
             <userQuery/>
         </prompt>
-        <output endConversation="true"/>
+        <output endConversation="true">
+<!--            TODO <applyPatches/>-->
+        </output>
         <!-- TODO Handle close conversation -->
-        <!-- TODO Apply patch -->
     </agent>
 </config>
