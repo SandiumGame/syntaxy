@@ -21,7 +21,7 @@
         <prompt onInitialConversation="true" onContinuedConversation="true" keepInConversation="false">
             <userQuery/>
         </prompt>
-        <output hideOutput="true">
+        <output showOutput="false">
             <routeToAgent/>
         </output>
     </agent>
@@ -32,7 +32,7 @@
         <prompt onInitialConversation="true" onContinuedConversation="true" keepInConversation="true">
             <userQuery/>
         </prompt>
-        <output closeConversation="false"/>
+        <output endConversation="false"/>
         <!-- TODO Attribute to leave conversation open/closed -->
         <!-- TODO Agent to run if user enters another prompt (default is this one) -->
     </agent>
@@ -44,7 +44,7 @@
         <prompt onInitialConversation="true" onContinuedConversation="true" keepInConversation="true">
             <userQuery/>
         </prompt>
-        <output closeConversation="true"/>
+        <output endConversation="true"/>
         <!-- TODO Handle close conversation -->
         <!-- TODO Apply patch -->
     </agent>

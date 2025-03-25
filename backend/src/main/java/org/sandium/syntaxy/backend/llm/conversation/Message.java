@@ -10,6 +10,7 @@ public class Message {
     private final Conversation conversation;
     private Collection<MessageListener> listeners;
     private PromptType promptType;
+    private boolean temporary;
     private final StringBuilder content;
 
     public Message(Conversation conversation) {
@@ -28,6 +29,14 @@ public class Message {
 
     public void setMessageType(PromptType promptType) {
         this.promptType = promptType;
+    }
+
+    public boolean isTemporary() {
+        return temporary;
+    }
+
+    public void setTemporary(boolean temporary) {
+        this.temporary = temporary;
     }
 
     public String getContent() {

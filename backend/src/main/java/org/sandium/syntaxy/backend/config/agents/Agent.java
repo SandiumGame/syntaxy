@@ -20,6 +20,9 @@ public class Agent {
     private String title;
     private String description;
     private final List<Prompt> prompts;
+    private boolean showOutput;
+    private boolean endConversation;
+    private boolean routeToAgent;
 
     public Agent(Config config) {
         this.config = config;
@@ -74,12 +77,53 @@ public class Agent {
         return prompts;
     }
 
+    public boolean isShowOutput() {
+        return showOutput;
+    }
+
+    public void setShowOutput(boolean showOutput) {
+        this.showOutput = showOutput;
+    }
+
+    public boolean isEndConversation() {
+        return endConversation;
+    }
+
+    public void setEndConversation(boolean endConversation) {
+        this.endConversation = endConversation;
+    }
+
+    public boolean isRouteToAgent() {
+        return routeToAgent;
+    }
+
+    public void setRouteToAgent(boolean routeToAgent) {
+        this.routeToAgent = routeToAgent;
+    }
+
     public void execute(Conversation conversation, ExecutionContext executionContext, BaseProvider provider) {
         generatePrompts(conversation, executionContext);
 //        conversation.setModel();
 
         provider.execute(conversation);
-        // TODO process output callback
+
+        if (routeToAgent) {
+            ArrayList<Message> messages = conversation.getMessages();
+            Message message = messages.get(messages.size() - 1);
+
+            Agent nextAgent = config.getAgent(message.getContent());
+            if (nextAgent == null) {
+                // TODO Handle error
+                return;
+            }
+
+            // TODO Remove prompts
+            // TODO Clone conversation. Set this one as previous. List of conversations.
+            // TODO   Separate window to debug conversations / view logs
+            // TODO Add log output to conversation to say it is routing to next agent
+
+            nextAgent.execute(conversation, executionContext, provider);
+        }
     }
 
     private void generatePrompts(Conversation conversation, ExecutionContext executionContext) {
@@ -93,7 +137,9 @@ public class Agent {
                     builder.append(snippet.getText(executionContext, config));
                 }
 
+
                 Message message = conversation.addMessage();
+                message.setTemporary(prompt.isKeepInConversation());
                 message.setMessageType(prompt.getType());
                 message.setContent(formatPrompt(builder));
             }

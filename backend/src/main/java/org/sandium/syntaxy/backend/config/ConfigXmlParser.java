@@ -101,7 +101,8 @@ public class ConfigXmlParser {
 
         parseChildren(null, Map.of(
                 "system", () -> parsePrompt(agent, PromptType.SYSTEM),
-                "prompt", () -> parsePrompt(agent, PromptType.USER)));
+                "prompt", () -> parsePrompt(agent, PromptType.USER),
+                    "output", () -> parseOutput(agent)));
 
         config.addAgent(agent);
     }
@@ -122,6 +123,23 @@ public class ConfigXmlParser {
                 "listRoutes", () -> parseListRoutes(prompt),
                 "userQuery", () -> parseUserQuery(prompt),
                 "userLocale", () -> parseUserLocale(prompt)));
+    }
+
+    private void parseOutput(Agent agent) throws XMLStreamException {
+        verifyAttributes("showOutput", "endConversation");
+
+        agent.setShowOutput(getBooleanAttribute("showOutput", true));
+        agent.setEndConversation(getBooleanAttribute("endConversation", false));
+
+        parseChildren(null, Map.of(
+                "routeToAgent", () -> parseRouteToAgent(agent)));
+    }
+
+    private void parseRouteToAgent(Agent agent) throws XMLStreamException {
+        verifyNoAttributes();
+        verifyNoChildElements();
+
+        agent.setRouteToAgent(true);
     }
 
     private void parseListRoutes(Prompt prompt) throws XMLStreamException {
@@ -211,6 +229,14 @@ public class ConfigXmlParser {
         String value = reader.getAttributeValue(null, name);
         if (value == null) {
             error("Expected attribute \"%s\"".formatted(name));
+        }
+        return Boolean.parseBoolean(value);
+    }
+
+    private boolean getBooleanAttribute(String name, boolean defaultValue) {
+        String value = reader.getAttributeValue(null, name);
+        if (value == null) {
+            return defaultValue;
         }
         return Boolean.parseBoolean(value);
     }
