@@ -31,17 +31,16 @@ public class Conversation {
     }
 
     public void copyCurrentInteraction() {
-        Interaction interaction = new Interaction(this);
+        Interaction oldInteraction = getCurrentInteraction();
+        Interaction newInteraction = new Interaction(this);
 
-        interaction.
+        newInteraction.setUserQuery(oldInteraction.getUserQuery());
 
         private String userQuery;
-        private final ArrayList<Message> messages;
-        private final Set<String> agents;
-        private String script;
+        private final ArrayList<Message> messages; // TODO Remove temp messages
+        private final Set<String> agents; // TODO move to conversation?
+        private String script; // TODO Only need for the initial start
         private Model model;
-        private long amountSpentNanos;
-        private boolean finished;
 
         addIneraction(interaction);
     }
