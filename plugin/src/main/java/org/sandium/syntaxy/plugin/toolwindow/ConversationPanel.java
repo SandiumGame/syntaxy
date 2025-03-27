@@ -7,8 +7,9 @@ import org.sandium.syntaxy.backend.AiExecutor;
 import org.sandium.syntaxy.backend.ExecutionContext;
 import org.sandium.syntaxy.backend.llm.conversation.Conversation;
 import org.sandium.syntaxy.backend.llm.conversation.ConversationListener;
+import org.sandium.syntaxy.backend.llm.conversation.InteractionListener;
+import org.sandium.syntaxy.backend.llm.conversation.Interaction;
 import org.sandium.syntaxy.backend.llm.conversation.Message;
-import org.sandium.syntaxy.backend.config.prompt.PromptType;
 import org.sandium.syntaxy.plugin.core.AiService;
 
 import javax.swing.*;
@@ -38,24 +39,8 @@ public class ConversationPanel {
 
         conversation.addListener(new ConversationListener() {
             @Override
-            public void messageAdded(Message message) {
-                SwingUtilities.invokeLater(() -> {
-                    MessagePanel messagePanel = new MessagePanel(message);
-                    interactions.add(messagePanel);
-                    panel.add(messagePanel.getPanel());
-                    panel.revalidate();
-                });
-            }
-
-            @Override
-            public void finished(Conversation conversation) {
-                System.out.println("Usage: $" + aiService.getTotalAmountSpentNanos() / 1000000000.0);
-                // TODO enable submit button
-            }
-
-            @Override
-            public void usageUpdated(Conversation result, long amountSpentNanos) {
-                aiService.addUsage(amountSpentNanos);
+            public void interactionAdded(Interaction interaction) {
+                ConversationPanel.this.interactionAdded(interaction);
             }
         });
     }
@@ -64,13 +49,52 @@ public class ConversationPanel {
         return panel;
     }
 
+    private void interactionAdded(Interaction interaction) {
+        interaction.addListener(new InteractionListener() {
+            @Override
+            public void messageAdded(Message message) {
+                ConversationPanel.this.messageAdded(message);
+            }
+
+            @Override
+            public void finished(Interaction interaction) {
+                ConversationPanel.this.finished(interaction);
+            }
+
+            @Override
+            public void usageUpdated(Interaction interaction, long amountSpentNanos) {
+                ConversationPanel.this.usageUpdated(interaction, amountSpentNanos);
+            }
+        });
+    }
+
+    private void messageAdded(Message message) {
+        SwingUtilities.invokeLater(() -> {
+            MessagePanel messagePanel = new MessagePanel(message);
+            interactions.add(messagePanel);
+            panel.add(messagePanel.getPanel());
+            panel.revalidate();
+        });
+
+    }
+
+    private void finished(Interaction interaction) {
+        System.out.println("Usage: $" + aiService.getTotalAmountSpentNanos() / 1000000000.0);
+        // TODO enable submit button
+    }
+
+    private void usageUpdated(Interaction interaction, long amountSpentNanos) {
+        aiService.addUsage(amountSpentNanos);
+    }
+
     public void submit(String userQuery, ExecutionContext executionContext) {
         AiExecutor executor = aiService.getAiExecutor();
 
-        executionContext.setUserQuery(userQuery);
+        Interaction interaction = conversation.addInteraction();
+        interaction.setUserQuery(userQuery);
+        interaction.setScript("MainRouter");
+        interaction.setModel(executor.getDefaultModel());
 
-        conversation.setScript("MainRouter");
-        conversation.setModel(executor.getDefaultModel());
         executor.execute(conversation, executionContext);
     }
 

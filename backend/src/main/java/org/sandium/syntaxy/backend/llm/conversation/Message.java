@@ -7,14 +7,14 @@ import java.util.Collection;
 
 public class Message {
 
-    private final Conversation conversation;
+    private final Interaction interaction;
     private Collection<MessageListener> listeners;
     private PromptType promptType;
-    private boolean temporary;
+    private boolean keepInConversation;
     private final StringBuilder content;
 
-    public Message(Conversation conversation) {
-        this.conversation = conversation;
+    public Message(Interaction interaction) {
+        this.interaction = interaction;
         listeners = new ArrayList<>();
         content = new StringBuilder();
     }
@@ -31,12 +31,12 @@ public class Message {
         this.promptType = promptType;
     }
 
-    public boolean isTemporary() {
-        return temporary;
+    public boolean isKeepInConversation() {
+        return keepInConversation;
     }
 
-    public void setTemporary(boolean temporary) {
-        this.temporary = temporary;
+    public void setKeepInConversation(boolean keepInConversation) {
+        this.keepInConversation = keepInConversation;
     }
 
     public String getContent() {

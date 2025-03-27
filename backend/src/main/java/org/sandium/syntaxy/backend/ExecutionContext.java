@@ -10,7 +10,6 @@ public class ExecutionContext {
     private Path projectDir;
     private Path selectedOpenFile;
     private Collection<Path> openFiles;
-    private String userQuery;
 
     public Locale getUserLocale() {
         return userLocale;
@@ -44,11 +43,4 @@ public class ExecutionContext {
         this.openFiles = openFiles;
     }
 
-    public String getUserQuery() {
-        return userQuery;
-    }
-
-    public void setUserQuery(String userQuery) {
-        this.userQuery = userQuery;
-    }
 }

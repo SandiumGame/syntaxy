@@ -1,6 +1,6 @@
 package org.sandium.syntaxy.backend.llm.providers;
 
-import org.sandium.syntaxy.backend.llm.conversation.Conversation;
+import org.sandium.syntaxy.backend.llm.conversation.Interaction;
 import org.sandium.syntaxy.backend.llm.conversation.Message;
 import org.sandium.syntaxy.backend.config.prompt.PromptType;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
@@ -40,8 +40,8 @@ public class Bedrock extends BaseProvider {
         }
     }
 
-    public void execute(Conversation conversation) {
-        ArrayList<Message> messages = conversation.getMessages();
+    public void execute(Interaction interaction) {
+        ArrayList<Message> messages = interaction.getMessages();
         ArrayList<SystemContentBlock> systemMessages = new ArrayList<>();
         ArrayList<software.amazon.awssdk.services.bedrockruntime.model.Message> bedrockMessages = new ArrayList<>();
         for (Message message : messages) {
@@ -57,28 +57,28 @@ public class Bedrock extends BaseProvider {
             }
         }
 
-        Message response = conversation.addMessage();
+        Message response = interaction.addMessage();
         response.setMessageType(PromptType.ASSISTANT);
 
         var responseStreamHandler = ConverseStreamResponseHandler.builder()
                 .subscriber(ConverseStreamResponseHandler.Visitor.builder()
                         .onContentBlockDelta(chunk -> response.addContent(chunk.delta().text()))
-                        .onContentBlockStop(stopEvent -> conversation.setFinished())
+                        .onContentBlockStop(stopEvent -> interaction.setFinished())
                         .onMetadata(metadataEvent -> {
                             TokenUsage usage = metadataEvent.usage();
                             if (usage != null) {
-                                conversation.addUsage(usage.inputTokens() != null ? usage.inputTokens() : 0,
+                                interaction.addUsage(usage.inputTokens() != null ? usage.inputTokens() : 0,
                                         usage.outputTokens() != null ? usage.outputTokens() : 0);
                             }
                         })
                         .build()
                 ).onError(err ->
                         // TODO Handle errors
-                        System.err.printf("Can't invoke '%s': %s", conversation.getModel().getName(), err.getMessage())
+                        System.err.printf("Can't invoke '%s': %s", interaction.getModel().getName(), err.getMessage())
                 ).build();
 
         try {
-            client.converseStream(request -> request.modelId(conversation.getModel().getName())
+            client.converseStream(request -> request.modelId(interaction.getModel().getName())
                     .system(systemMessages.toArray(SystemContentBlock[]::new))
                     .messages(bedrockMessages.toArray(software.amazon.awssdk.services.bedrockruntime.model.Message[]::new))
 //                    .inferenceConfig(config -> config

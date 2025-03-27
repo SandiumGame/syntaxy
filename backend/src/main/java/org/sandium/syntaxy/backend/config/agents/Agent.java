@@ -5,6 +5,7 @@ import org.sandium.syntaxy.backend.config.Config;
 import org.sandium.syntaxy.backend.config.prompt.Prompt;
 import org.sandium.syntaxy.backend.config.prompt.Snippet;
 import org.sandium.syntaxy.backend.llm.conversation.Conversation;
+import org.sandium.syntaxy.backend.llm.conversation.Interaction;
 import org.sandium.syntaxy.backend.llm.conversation.Message;
 import org.sandium.syntaxy.backend.llm.providers.BaseProvider;
 
@@ -102,13 +103,13 @@ public class Agent {
     }
 
     public void execute(Conversation conversation, ExecutionContext executionContext, BaseProvider provider) {
-        generatePrompts(conversation, executionContext);
-//        conversation.setModel();
+        Interaction interaction = conversation.getCurrentInteraction();
 
-        provider.execute(conversation);
+        generatePrompts(interaction, executionContext);
+        provider.execute(interaction);
 
         if (routeToAgent) {
-            ArrayList<Message> messages = conversation.getMessages();
+            ArrayList<Message> messages = interaction.getMessages();
             Message message = messages.get(messages.size() - 1);
 
             Agent nextAgent = config.getAgent(message.getContent());
@@ -117,29 +118,28 @@ public class Agent {
                 return;
             }
 
+            conversation.copyCurrentInteraction();
             // TODO Remove temp prompts
-            // TODO Clone conversation. Set this one as previous. List of conversations.
-            // TODO   Separate window to debug conversations / view logs
+            // TODO Separate window to debug conversations / view logs
             // TODO Add log output to conversation to say it is routing to next agent
 
             nextAgent.execute(conversation, executionContext, provider);
         }
     }
 
-    private void generatePrompts(Conversation conversation, ExecutionContext executionContext) {
-        boolean continuedConversation = conversation.containsAgent(id) && (!conversation.getMessages().isEmpty());
+    private void generatePrompts(Interaction interaction, ExecutionContext executionContext) {
+        boolean continuedConversation = interaction.containsAgent(id) && (!interaction.getMessages().isEmpty());
         for (Prompt prompt : prompts) {
             if ((!continuedConversation && prompt.isOnInitialConversation())
                     || (continuedConversation && prompt.isOnContinuedConversation())) {
 
                 StringBuilder builder = new StringBuilder();
                 for (Snippet snippet : prompt.getSnippets()) {
-                    builder.append(snippet.getText(executionContext, config));
+                    builder.append(snippet.getText(interaction, executionContext, config));
                 }
 
-
-                Message message = conversation.addMessage();
-                message.setTemporary(prompt.isKeepInConversation());
+                Message message = interaction.addMessage();
+                message.setKeepInConversation(prompt.isKeepInConversation());
                 message.setMessageType(prompt.getType());
                 message.setContent(formatPrompt(builder));
             }

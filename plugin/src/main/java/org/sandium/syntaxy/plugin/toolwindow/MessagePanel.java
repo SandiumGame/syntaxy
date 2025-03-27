@@ -14,7 +14,7 @@ public class MessagePanel {
 
     public static final Insets TEXT_AREA_INSET = JBUI.insets(5);
 
-    private Message message;
+    private final Message message;
     private final JBPanel<?> panel;
     JBTextArea content;
 

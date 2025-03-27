@@ -5,6 +5,7 @@ import org.sandium.syntaxy.backend.config.ConfigXmlParser;
 import org.sandium.syntaxy.backend.config.agents.Agent;
 import org.sandium.syntaxy.backend.llm.Model;
 import org.sandium.syntaxy.backend.llm.conversation.Conversation;
+import org.sandium.syntaxy.backend.llm.conversation.Interaction;
 import org.sandium.syntaxy.backend.llm.conversation.Message;
 import org.sandium.syntaxy.backend.llm.providers.BaseProvider;
 import org.sandium.syntaxy.backend.llm.providers.Bedrock;
@@ -52,14 +53,15 @@ public class AiExecutor {
 
     public void execute(Conversation conversation, ExecutionContext executionContext) {
         new Thread(() -> {
-            for (Message message : conversation.getMessages()) {
+            Interaction interaction = conversation.getCurrentInteraction();
+            for (Message message : interaction.getMessages()) {
                 if (message.getMessageType() == null) {
                     throw new RuntimeException("Message type can not be null.");
                 }
             }
 
             // TODO Find script. Format message text. Pass to LLM.
-            Agent agent = config.getAgent(conversation.getScript());
+            Agent agent = config.getAgent(interaction.getScript());
             if (agent == null) {
                 // TODO Handle bad agent. Should really happen
                 return;

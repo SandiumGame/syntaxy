@@ -2,6 +2,7 @@ package org.sandium.syntaxy.backend.config.prompt;
 
 import org.sandium.syntaxy.backend.ExecutionContext;
 import org.sandium.syntaxy.backend.config.Config;
+import org.sandium.syntaxy.backend.llm.conversation.Interaction;
 
 public class ListRoutesSnippet extends Snippet {
 
@@ -16,7 +17,7 @@ public class ListRoutesSnippet extends Snippet {
     }
 
     @Override
-    public String getText(ExecutionContext executionContext, Config config) {
+    public String getText(Interaction interaction, ExecutionContext executionContext, Config config) {
         StringBuilder builder = new StringBuilder();
 
         config.getAgentsByGroup(group).forEach(agent -> {
