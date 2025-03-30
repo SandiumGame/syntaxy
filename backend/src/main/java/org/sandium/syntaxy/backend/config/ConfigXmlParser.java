@@ -7,6 +7,8 @@ import org.sandium.syntaxy.backend.config.prompt.PromptType;
 import org.sandium.syntaxy.backend.config.prompt.TextSnippet;
 import org.sandium.syntaxy.backend.config.prompt.UserLocaleSnippet;
 import org.sandium.syntaxy.backend.config.prompt.UserQuerySnippet;
+import org.sandium.syntaxy.backend.llm.Model;
+import org.sandium.syntaxy.backend.llm.providers.Provider;
 
 import javax.xml.stream.Location;
 import javax.xml.stream.XMLInputFactory;
@@ -24,7 +26,6 @@ public class ConfigXmlParser {
     private final InputStream xml;
     private final Config config;
     private XMLStreamReader reader;
-    private String currentProvider;
 
     public ConfigXmlParser(InputStream xml, Config config) throws IOException {
         String text = new String(xml.readAllBytes(), StandardCharsets.UTF_8)
@@ -69,23 +70,29 @@ public class ConfigXmlParser {
     private void parseModelsElement() throws XMLStreamException {
         verifyAttributes("provider");
 
-        currentProvider = getAttribute("provider");
+        Provider provider = config.getProvider(getAttribute("provider"));
+        if (provider == null) {
+            error("Unknown provider " + getAttribute("provider"));
+            return;
+        }
 
         parseChildren(null, Map.of(
-                "model", this::parseModelElement,
-                "modelAlias", this::parseModelAliasElement));
-
-        currentProvider = null;
+                "model", () -> parseModelElement(provider),
+                "modelAlias", () -> parseModelAliasElement(provider)));
     }
 
-    private void parseModelElement() throws XMLStreamException {
-        // TODO Read attributes
+    private void parseModelElement(Provider provider) throws XMLStreamException {
+        Model model = new Model(getAttribute("name"),
+                getAttribute("id"),
+                (long) (getDoubleAttribute("inputCost") / 1000000.0 * 1000000000.0),
+                (long) (getDoubleAttribute("outputCost") / 1000000.0 * 1000000000.0));
+        provider.addModel(model);
 
         verifyNoChildElements();
     }
 
-    private void parseModelAliasElement() throws XMLStreamException {
-        // TODO Read attributes
+    private void parseModelAliasElement(Provider provider) throws XMLStreamException {
+        provider.addModelAlias(getAttribute("name"), getAttribute("alias"));
 
         verifyNoChildElements();
     }
@@ -95,7 +102,7 @@ public class ConfigXmlParser {
         Agent agent = new Agent(config);
         agent.setId(getAttribute("id"));
         agent.setGroup(getAttribute("group", null));
-        agent.setModel(getAttribute("model"));
+        agent.setModelName(getAttribute("model"));
         agent.setTitle(getAttribute("title", null));
         agent.setDescription(getAttribute("description", null));
 
@@ -223,6 +230,21 @@ public class ConfigXmlParser {
             return defaultValue;
         }
         return value;
+    }
+
+    private double getDoubleAttribute(String name) {
+        String value = reader.getAttributeValue(null, name);
+        if (value == null) {
+            error("Expected attribute \"%s\"".formatted(name));
+            return 0;
+        } else {
+            try {
+                return Double.parseDouble(value);
+            } catch (NumberFormatException e) {
+                error("Invalid number " + value);
+                return 0;
+            }
+        }
     }
 
     private boolean getBooleanAttribute(String name) {

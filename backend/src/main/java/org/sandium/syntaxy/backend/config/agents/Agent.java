@@ -4,10 +4,11 @@ import org.sandium.syntaxy.backend.ExecutionContext;
 import org.sandium.syntaxy.backend.config.Config;
 import org.sandium.syntaxy.backend.config.prompt.Prompt;
 import org.sandium.syntaxy.backend.config.prompt.Snippet;
+import org.sandium.syntaxy.backend.llm.Model;
 import org.sandium.syntaxy.backend.llm.conversation.Conversation;
 import org.sandium.syntaxy.backend.llm.conversation.Interaction;
 import org.sandium.syntaxy.backend.llm.conversation.Message;
-import org.sandium.syntaxy.backend.llm.providers.BaseProvider;
+import org.sandium.syntaxy.backend.llm.providers.Provider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +18,8 @@ public class Agent {
     private final Config config;
     private String id;
     private String group;
-    private String model;
+    private String modelName;
+    private Model model;
     private String title;
     private String description;
     private final List<Prompt> prompts;
@@ -50,11 +52,19 @@ public class Agent {
         this.group = group;
     }
 
-    public String getModel() {
+    public String getModelName() {
+        return modelName;
+    }
+
+    public void setModelName(String modelName) {
+        this.modelName = modelName;
+    }
+
+    public Model getModel() {
         return model;
     }
 
-    public void setModel(String model) {
+    public void setModel(Model model) {
         this.model = model;
     }
 
@@ -102,10 +112,10 @@ public class Agent {
         this.routeToAgent = routeToAgent;
     }
 
-    public void execute(Conversation conversation, ExecutionContext executionContext, BaseProvider provider) {
+    public void execute(Conversation conversation, ExecutionContext executionContext, Provider provider) {
         Interaction interaction = conversation.getCurrentInteraction();
 
-        generatePrompts(interaction, executionContext);
+        generatePrompts(conversation, executionContext);
         provider.execute(interaction);
 
         if (routeToAgent) {
@@ -127,8 +137,10 @@ public class Agent {
         }
     }
 
-    private void generatePrompts(Interaction interaction, ExecutionContext executionContext) {
-        boolean continuedConversation = interaction.containsAgent(id) && (!interaction.getMessages().isEmpty());
+    private void generatePrompts(Conversation conversation, ExecutionContext executionContext) {
+        Interaction interaction = conversation.getCurrentInteraction();
+
+        boolean continuedConversation = conversation.containsAgent(id) && (!interaction.getMessages().isEmpty());
         for (Prompt prompt : prompts) {
             if ((!continuedConversation && prompt.isOnInitialConversation())
                     || (continuedConversation && prompt.isOnContinuedConversation())) {

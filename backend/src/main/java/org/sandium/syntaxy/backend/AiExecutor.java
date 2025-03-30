@@ -7,10 +7,8 @@ import org.sandium.syntaxy.backend.llm.Model;
 import org.sandium.syntaxy.backend.llm.conversation.Conversation;
 import org.sandium.syntaxy.backend.llm.conversation.Interaction;
 import org.sandium.syntaxy.backend.llm.conversation.Message;
-import org.sandium.syntaxy.backend.llm.providers.BaseProvider;
+import org.sandium.syntaxy.backend.llm.providers.Provider;
 import org.sandium.syntaxy.backend.llm.providers.Bedrock;
-
-import java.io.IOException;
 
 public class AiExecutor {
 
@@ -31,24 +29,39 @@ public class AiExecutor {
      */
 
     private Config config;
-    private BaseProvider provider;
-    private Model model = new Model("anthropic.claude-3-haiku-20240307-v1:0", INPUT_TOKEN_COST, OUTPUT_TOKEN_COST);
+    private Provider provider;
 
     public AiExecutor() {
         config = new Config();
+        config.addProvider(new Bedrock());
+
         try {
             ConfigXmlParser parser = new ConfigXmlParser(AiExecutor.class.getResourceAsStream("/config.xml"), config);
             parser.parse();
+
+//            for (BaseProvider provider : config.getProviders()) {
+//                provider.initModels();
+//            }
         } catch (Exception e) {
             // TODO Need to handle errors
             throw new RuntimeException(e);
         }
 
-        provider = new Bedrock();
     }
 
-    public Model getDefaultModel() {
-        return model;
+    private void setAgentModels() {
+        for (Agent agent : config.getAgents()) {
+            Model model = provider.getModel(agent.getModelName());
+
+            if (model == null) {
+                throw new RuntimeException("Could not find matching model " + agent.getModelName());
+            }
+            agent.setModel(model);
+        }
+    }
+
+    public Config getConfig() {
+        return config;
     }
 
     public void execute(Conversation conversation, ExecutionContext executionContext) {
@@ -61,10 +74,10 @@ public class AiExecutor {
             }
 
             // TODO Find script. Format message text. Pass to LLM.
-            Agent agent = config.getAgent(interaction.getScript());
+            Agent agent = interaction.getAgent();
             if (agent == null) {
                 // TODO Handle bad agent. Should really happen
-                return;
+                throw new RuntimeException("Agent not set");
             }
 
             agent.execute(conversation, executionContext, provider);

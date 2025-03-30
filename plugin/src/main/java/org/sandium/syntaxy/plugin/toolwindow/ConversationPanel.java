@@ -5,6 +5,8 @@ import com.intellij.openapi.ui.VerticalFlowLayout;
 import com.intellij.ui.components.JBPanel;
 import org.sandium.syntaxy.backend.AiExecutor;
 import org.sandium.syntaxy.backend.ExecutionContext;
+import org.sandium.syntaxy.backend.config.Config;
+import org.sandium.syntaxy.backend.config.agents.Agent;
 import org.sandium.syntaxy.backend.llm.conversation.Conversation;
 import org.sandium.syntaxy.backend.llm.conversation.ConversationListener;
 import org.sandium.syntaxy.backend.llm.conversation.InteractionListener;
@@ -89,11 +91,17 @@ public class ConversationPanel {
 
     public void submit(String userQuery, ExecutionContext executionContext) {
         AiExecutor executor = aiService.getAiExecutor();
+        Config config = executor.getConfig();
+
+        Agent agent = config.getAgent("MainRouter");
+        if (agent == null) {
+            // TODO Handle error better
+            throw new RuntimeException("Can't find agent");
+        }
 
         Interaction interaction = conversation.addInteraction();
         interaction.setUserQuery(userQuery);
-        interaction.setScript("MainRouter");
-        interaction.setModel(executor.getDefaultModel());
+        interaction.setAgent(agent);
 
         executor.execute(conversation, executionContext);
     }

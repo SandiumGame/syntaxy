@@ -1,5 +1,6 @@
 package org.sandium.syntaxy.backend.llm.providers;
 
+import org.sandium.syntaxy.backend.llm.Model;
 import org.sandium.syntaxy.backend.llm.conversation.Interaction;
 import org.sandium.syntaxy.backend.llm.conversation.Message;
 import org.sandium.syntaxy.backend.config.prompt.PromptType;
@@ -19,11 +20,13 @@ import software.amazon.awssdk.services.bedrockruntime.model.TokenUsage;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 
-public class Bedrock extends BaseProvider {
+public class Bedrock extends Provider {
 
     private final BedrockRuntimeAsyncClient client;
 
     public Bedrock() {
+        super("bedrock");
+
         client = BedrockRuntimeAsyncClient.builder()
                 .credentialsProvider(DefaultCredentialsProvider.create())
                 .region(Region.US_EAST_1)
@@ -33,11 +36,18 @@ public class Bedrock extends BaseProvider {
                 .credentialsProvider(DefaultCredentialsProvider.create())
                 .region(Region.US_EAST_1)
                 .build();
+
         ListFoundationModelsResponse models = bedrockClient.listFoundationModels(ListFoundationModelsRequest.builder().build());
         for (FoundationModelSummary summary : models.modelSummaries()) {
             summary.responseStreamingSupported();
 //            System.out.println(summary.modelName() + "\n " + summary.modelId() + "\n " + summary.modelArn());
         }
+    }
+
+    protected void verifyModel(Model model) {
+        // TODO Need custom exception??
+        System.out.println(model.getPattern());
+        // TODO Set id in model
     }
 
     public void execute(Interaction interaction) {
@@ -60,6 +70,8 @@ public class Bedrock extends BaseProvider {
         Message response = interaction.addMessage();
         response.setMessageType(PromptType.ASSISTANT);
 
+        Model model = interaction.getAgent().getModel();
+
         var responseStreamHandler = ConverseStreamResponseHandler.builder()
                 .subscriber(ConverseStreamResponseHandler.Visitor.builder()
                         .onContentBlockDelta(chunk -> response.addContent(chunk.delta().text()))
@@ -74,11 +86,11 @@ public class Bedrock extends BaseProvider {
                         .build()
                 ).onError(err ->
                         // TODO Handle errors
-                        System.err.printf("Can't invoke '%s': %s", interaction.getModel().getName(), err.getMessage())
+                        System.err.printf("Can't invoke '%s': %s", model.getName(), err.getMessage())
                 ).build();
 
         try {
-            client.converseStream(request -> request.modelId(interaction.getModel().getName())
+            client.converseStream(request -> request.modelId(model.getName())
                     .system(systemMessages.toArray(SystemContentBlock[]::new))
                     .messages(bedrockMessages.toArray(software.amazon.awssdk.services.bedrockruntime.model.Message[]::new))
 //                    .inferenceConfig(config -> config

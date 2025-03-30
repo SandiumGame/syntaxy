@@ -1,11 +1,10 @@
 package org.sandium.syntaxy.backend.llm.conversation;
 
+import org.sandium.syntaxy.backend.config.agents.Agent;
 import org.sandium.syntaxy.backend.llm.Model;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
 
 public class Interaction {
 
@@ -13,9 +12,7 @@ public class Interaction {
     final Collection<InteractionListener> listeners;
     private String userQuery;
     private final ArrayList<Message> messages;
-    private final Set<String> agents;
-    private String script;
-    private Model model;
+    private Agent agent;
     private long amountSpentNanos;
     private boolean finished;
 
@@ -23,7 +20,6 @@ public class Interaction {
         this.conversation = conversation;
         listeners = new ArrayList<>();
         messages = new ArrayList<>();
-        agents = new HashSet<>();
     }
 
     public Conversation getConversation() {
@@ -57,28 +53,12 @@ public class Interaction {
         return message;
     }
 
-    public void addAgent(String id) {
-        agents.add(id);
+    public Agent getAgent() {
+        return agent;
     }
 
-    public boolean containsAgent(String id) {
-        return agents.contains(id);
-    }
-
-    public String getScript() {
-        return script;
-    }
-
-    public void setScript(String script) {
-        this.script = script;
-    }
-
-    public Model getModel() {
-        return model;
-    }
-
-    public void setModel(Model model) {
-        this.model = model;
+    public void setAgent(Agent agent) {
+        this.agent = agent;
     }
 
     public long getAmountSpentNanos() {
@@ -86,6 +66,8 @@ public class Interaction {
     }
 
     public void addUsage(int inputTokens, int outputTokens) {
+        Model model = agent.getModel();
+
         long amount = inputTokens * model.getInputTokenCost() + outputTokens * model.getOutputTokenCost();
         amountSpentNanos += amount;
 

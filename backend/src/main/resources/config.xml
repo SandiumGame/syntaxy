@@ -1,6 +1,6 @@
 <config>
     <models provider="bedrock">
-        <model name="Sonnet" id="anthropic.claude-3-haiku*" inputCost="3.0" outputCost="15.0"/>
+        <model name="Sonnet" id="anthropic.claude-3-sonnet*" inputCost="3.0" outputCost="15.0"/>
         <model name="Haiku" id="anthropic.claude-3-haiku*" inputCost="0.80" outputCost="4.0"/>
 
         <modelAlias name="Haiku" alias="General"/>
