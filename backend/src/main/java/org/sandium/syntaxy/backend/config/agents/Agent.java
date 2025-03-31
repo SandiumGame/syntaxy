@@ -8,7 +8,6 @@ import org.sandium.syntaxy.backend.llm.Model;
 import org.sandium.syntaxy.backend.llm.conversation.Conversation;
 import org.sandium.syntaxy.backend.llm.conversation.Interaction;
 import org.sandium.syntaxy.backend.llm.conversation.Message;
-import org.sandium.syntaxy.backend.llm.providers.Provider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -112,11 +111,12 @@ public class Agent {
         this.routeToAgent = routeToAgent;
     }
 
-    public void execute(Conversation conversation, ExecutionContext executionContext, Provider provider) {
+    public void execute(Conversation conversation, ExecutionContext executionContext) {
         Interaction interaction = conversation.getCurrentInteraction();
 
         generatePrompts(conversation, executionContext);
-        provider.execute(interaction);
+        interaction.setAgent(this);
+        getModel().getProvider().execute(interaction);
 
         if (routeToAgent) {
             ArrayList<Message> messages = interaction.getMessages();
@@ -133,7 +133,7 @@ public class Agent {
             // TODO Separate window to debug conversations / view logs
             // TODO Add log output to conversation to say it is routing to next agent
 
-            nextAgent.execute(conversation, executionContext, provider);
+            nextAgent.execute(conversation, executionContext);
         }
     }
 

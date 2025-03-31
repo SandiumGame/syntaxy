@@ -32,8 +32,12 @@ public abstract class Provider {
     }
 
     public Model getModel(String modelName) {
-        // TODO Look up aliases
-        return null;
+        String alias;
+        while((alias = modelAliases.get(modelName)) != null) {
+            modelName = alias;
+        }
+
+        return models.get(modelName);
     }
 
     protected abstract void verifyModel(Model model);

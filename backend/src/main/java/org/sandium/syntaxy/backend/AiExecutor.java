@@ -29,7 +29,6 @@ public class AiExecutor {
      */
 
     private Config config;
-    private Provider provider;
 
     public AiExecutor() {
         config = new Config();
@@ -39,9 +38,7 @@ public class AiExecutor {
             ConfigXmlParser parser = new ConfigXmlParser(AiExecutor.class.getResourceAsStream("/config.xml"), config);
             parser.parse();
 
-//            for (BaseProvider provider : config.getProviders()) {
-//                provider.initModels();
-//            }
+            setAgentModels();
         } catch (Exception e) {
             // TODO Need to handle errors
             throw new RuntimeException(e);
@@ -50,13 +47,15 @@ public class AiExecutor {
     }
 
     private void setAgentModels() {
+        nextAgent:
         for (Agent agent : config.getAgents()) {
-            Model model = provider.getModel(agent.getModelName());
-
-            if (model == null) {
-                throw new RuntimeException("Could not find matching model " + agent.getModelName());
+            for (Provider provider : config.getProviders()) {
+                Model model = provider.getModel(agent.getModelName());
+                agent.setModel(model);
+                continue nextAgent;
             }
-            agent.setModel(model);
+
+            throw new RuntimeException("Could not find matching model " + agent.getModelName());
         }
     }
 
@@ -80,7 +79,7 @@ public class AiExecutor {
                 throw new RuntimeException("Agent not set");
             }
 
-            agent.execute(conversation, executionContext, provider);
+            agent.execute(conversation, executionContext);
 
             // TODO Verify model and other fields
 

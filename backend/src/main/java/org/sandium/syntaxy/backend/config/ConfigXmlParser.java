@@ -82,8 +82,28 @@ public class ConfigXmlParser {
     }
 
     private void parseModelElement(Provider provider) throws XMLStreamException {
-        Model model = new Model(getAttribute("name"),
-                getAttribute("id"),
+        verifyAttributes("name", "id", "inputCost", "outputCost");
+
+        StringBuilder idRegex = new StringBuilder();
+
+        idRegex.append("^");
+        String id = getAttribute("id");
+        id.chars().forEach(value -> {
+            if (value == '*') {
+                idRegex.append(".*");
+            } else {
+                String hex = Integer.toHexString(value);
+                idRegex.append("\\u");
+                idRegex.append("0".repeat(Math.max(0, 4 - hex.length())));
+                idRegex.append(hex);
+            }
+        });
+        idRegex.append("$");
+
+        Model model = new Model(provider,
+                getAttribute("name"),
+                id,
+                idRegex.toString(),
                 (long) (getDoubleAttribute("inputCost") / 1000000.0 * 1000000000.0),
                 (long) (getDoubleAttribute("outputCost") / 1000000.0 * 1000000000.0));
         provider.addModel(model);
@@ -124,9 +144,7 @@ public class ConfigXmlParser {
         prompt.setKeepInConversation(getBooleanAttribute("keepInConversation"));
         agent.getPrompts().add(prompt);
 
-        parseChildren(text -> {
-                prompt.getSnippets().add(new TextSnippet(text));
-            }, Map.of(
+        parseChildren(text -> prompt.getSnippets().add(new TextSnippet(text)), Map.of(
                 "listRoutes", () -> parseListRoutes(prompt),
                 "userQuery", () -> parseUserQuery(prompt),
                 "userLocale", () -> parseUserLocale(prompt)));

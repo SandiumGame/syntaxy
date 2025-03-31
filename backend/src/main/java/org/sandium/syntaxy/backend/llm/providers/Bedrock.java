@@ -18,11 +18,13 @@ import software.amazon.awssdk.services.bedrockruntime.model.SystemContentBlock;
 import software.amazon.awssdk.services.bedrockruntime.model.TokenUsage;
 
 import java.util.ArrayList;
+import java.util.TreeSet;
 import java.util.concurrent.ExecutionException;
 
 public class Bedrock extends Provider {
 
     private final BedrockRuntimeAsyncClient client;
+    private final TreeSet<String> models;
 
     public Bedrock() {
         super("bedrock");
@@ -37,17 +39,23 @@ public class Bedrock extends Provider {
                 .region(Region.US_EAST_1)
                 .build();
 
+        this.models = new TreeSet<>();
         ListFoundationModelsResponse models = bedrockClient.listFoundationModels(ListFoundationModelsRequest.builder().build());
         for (FoundationModelSummary summary : models.modelSummaries()) {
-            summary.responseStreamingSupported();
-//            System.out.println(summary.modelName() + "\n " + summary.modelId() + "\n " + summary.modelArn());
+            this.models.add(summary.modelId());
         }
     }
 
     protected void verifyModel(Model model) {
+        for (String id : models) {
+            if (id.matches(model.getIdRegex())) {
+                model.setId(id);
+                return;
+            }
+        }
+
         // TODO Need custom exception??
-        System.out.println(model.getPattern());
-        // TODO Set id in model
+        throw new RuntimeException("No model matches \"%s\"".formatted(model.getId()));
     }
 
     public void execute(Interaction interaction) {
@@ -90,12 +98,12 @@ public class Bedrock extends Provider {
                 ).build();
 
         try {
-            client.converseStream(request -> request.modelId(model.getName())
+            client.converseStream(request -> request.modelId(model.getId())
                     .system(systemMessages.toArray(SystemContentBlock[]::new))
-                    .messages(bedrockMessages.toArray(software.amazon.awssdk.services.bedrockruntime.model.Message[]::new))
+                    .messages(bedrockMessages.toArray(software.amazon.awssdk.services.bedrockruntime.model.Message[]::new)),
 //                    .inferenceConfig(config -> config
 //                            .maxTokens(512))
-                    , responseStreamHandler).get();
+                    responseStreamHandler).get();
         } catch (ExecutionException | InterruptedException e) {
             throw new RuntimeException(e);
         }
