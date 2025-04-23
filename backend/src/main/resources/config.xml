@@ -7,46 +7,82 @@
         <modelAlias name="Haiku" alias="Programming"/>
         <modelAlias name="Haiku" alias="Router"/>
     </models>
-    <agent id="MainRouter" model="Router" title="Main" description="Routes the users query to the appropriate agent">
-        <system onInitialConversation="true" onContinuedConversation="false" keepInConversation="false">
-            For the user prompt decide witch LLM agent is best able to handle this task.
-            - The agents are part of a development IDE
-            - Only choose one agent.
-            - Only output the name of the agent.
-            - Do not output anything else.
+    <agent id="MainRouter"
+           model="Router"
+           title="Main"
+           description="Routes the users query to the appropriate agent">
+        <input>
+            <system>
+                For the user prompt decide witch LLM agent is best able to handle this task.
+                - The agents are part of a development IDE
+                - Only choose one agent.
+                - Only output the name of the agent.
+                - Do not output anything else.
 
-            The agents and their descriptions are:
-            <listRoutes group="MainAgents"/>
-        </system>
-        <prompt onInitialConversation="true" onContinuedConversation="true" keepInConversation="false">
-            <userQuery/>
-        </prompt>
-        <output showOutput="false">
-            <routeToAgent/>
-        </output>
+                The agents and their descriptions are:
+                <listRoutes group="MainAgents"/>
+            </system>
+            <priorConversation/>
+            <user keepInConversation="false">
+                <userQuery/>
+            </user>
+        </input>
+        <routing>
+            <routeBasedOnOutputAgentId/>
+        </routing>
     </agent>
-    <agent id="GeneralQueryAgent" group="MainAgents" model="General" title="General Query" description="Answers general queries. Choose this if knowledge of the currently open project is not needed.">
-        <system onInitialConversation="true" onContinuedConversation="false" keepInConversation="true">
-            Answer the following query in <userLocale/>.
-        </system>
-        <prompt onInitialConversation="true" onContinuedConversation="true" keepInConversation="true">
-            <userQuery/>
-        </prompt>
-        <output endConversation="false"/>
-        <!-- TODO Attribute to leave conversation open/closed -->
-        <!-- TODO Agent to run if user enters another prompt (default is this one) -->
-    </agent>
-    <agent id="ProgrammingAgent" group="MainAgents" model="Programmer" title="Update Project Files" description="Can read/write to files in the current project. Pick this agent if the user wants to make changes to any files.">
-        <system onInitialConversation="true" onContinuedConversation="false" keepInConversation="true">
-            <!-- TODO Include open tabs -->
-            <!-- TODO Include programming rules -->
-        </system>
-        <prompt onInitialConversation="true" onContinuedConversation="true" keepInConversation="true">
-            <userQuery/>
-        </prompt>
-        <output endConversation="true">
-<!--            TODO <applyPatches/>-->
+    <agent id="GeneralQueryAgent"
+           group="MainAgents"
+           model="General"
+           title="General Query"
+           description="Answers general queries. Choose this if knowledge of the currently open project is not needed.">
+        <input>
+            <system>
+                Answer the following query in <userLocale/>.
+            </system>
+            <priorConversation/>
+            <user>
+                <userQuery/>
+            </user>
+        </input>
+        <output>
+            <assistant>
+                <assistantOutput/>
+            </assistant>
         </output>
-        <!-- TODO Handle close conversation -->
+        <routing>
+            <!-- TODO Need to set next agent if user enters another prompt -->
+            <onContinuedConversation id="MainRouter"/>
+        </routing>
+    </agent>
+    <agent id="ProgrammingAgent"
+           group="MainAgents"
+           model="Programming"
+           title="Update Project Files"
+           description="Can read/write to files in the current project. Pick this agent if the user wants to make changes to any files.">
+        <input>
+            <system>
+                <!-- TODO Include programming rules -->
+            </system>
+            <priorConversation/>
+            <forEachOpenFile>
+                <user>
+                    <fileText/>
+                </user>
+            </forEachOpenFile>
+            <user>
+                <userQuery/>
+            </user>
+        </input>
+        <output>
+            <assistant>
+                <assistantOutput/>
+            </assistant>
+            <applyPatches/>
+        </output>
+        <routing endConversation="true">
+            <!-- TODO Handle close conversation -->
+            <onContinuedConversation id="MainRouter"/>
+        </routing>
     </agent>
 </config>
