@@ -78,10 +78,11 @@
             <assistant>
                 <assistantOutput/>
             </assistant>
-            <applyPatches/>
         </output>
-        <routing endConversation="true">
+        <routing>
             <!-- TODO Handle close conversation -->
+            <applyPatches/>
+            <endConversation/>
             <onContinuedConversation id="MainRouter"/>
         </routing>
     </agent>
