@@ -10,6 +10,8 @@ dependencies {
     implementation group: 'software.amazon.awssdk', name: 'bedrock', version: '2.30.4'
     implementation group: 'software.amazon.awssdk', name: 'bedrockruntime', version: '2.30.4'
 
+    implementation group: 'com.sun.xml.bind', name: 'jaxb-impl', version: '4.0.5'
+
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
 }
