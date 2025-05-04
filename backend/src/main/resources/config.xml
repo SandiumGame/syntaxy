@@ -7,83 +7,83 @@
         <modelAlias name="Haiku" alias="Programming"/>
         <modelAlias name="Haiku" alias="Router"/>
     </models>
-    <agent id="MainRouter"
-           model="Router"
-           title="Main"
-           description="Routes the users query to the appropriate agent">
-        <input>
-            <system>
-                For the user prompt decide witch LLM agent is best able to handle this task.
-                - The agents are part of a development IDE
-                - Only choose one agent.
-                - Only output the name of the agent.
-                - Do not output anything else.
+<!--    <agent id="MainRouter"-->
+<!--           model="Router"-->
+<!--           title="Main"-->
+<!--           description="Routes the users query to the appropriate agent">-->
+<!--        <input>-->
+<!--            <system>-->
+<!--                For the user prompt decide witch LLM agent is best able to handle this task.-->
+<!--                - The agents are part of a development IDE-->
+<!--                - Only choose one agent.-->
+<!--                - Only output the name of the agent.-->
+<!--                - Do not output anything else.-->
 
-                The agents and their descriptions are:
-                <listRoutes group="MainAgents"/>
-            </system>
-            <priorConversation/>
-            <user keepInConversation="false">
-                <userQuery/>
-            </user>
-        </input>
-        <routing>
-            <routeBasedOnOutputAgentId/>
-        </routing>
-    </agent>
-    <agent id="GeneralQueryAgent"
-           group="MainAgents"
-           model="General"
-           title="General Query"
-           description="Answers general queries. Choose this if knowledge of the currently open project is not needed.">
-        <input>
-            <system>
-                Answer the following query in <userLocale/>.
-            </system>
-            <priorConversation/>
-            <user>
-                <userQuery/>
-            </user>
-        </input>
-        <output>
-            <assistant>
-                <assistantOutput/>
-            </assistant>
-        </output>
-        <routing>
-            <!-- TODO Need to set next agent if user enters another prompt -->
-            <onContinuedConversation id="MainRouter"/>
-        </routing>
-    </agent>
-    <agent id="ProgrammingAgent"
-           group="MainAgents"
-           model="Programming"
-           title="Update Project Files"
-           description="Can read/write to files in the current project. Pick this agent if the user wants to make changes to any files.">
-        <input>
-            <system>
-                <!-- TODO Include programming rules -->
-            </system>
-            <priorConversation/>
-            <forEachOpenFile>
-                <user>
-                    <fileText/>
-                </user>
-            </forEachOpenFile>
-            <user>
-                <userQuery/>
-            </user>
-        </input>
-        <output>
-            <assistant>
-                <assistantOutput/>
-            </assistant>
-        </output>
-        <routing>
-            <!-- TODO Handle close conversation -->
-            <applyPatches/>
-            <endConversation/>
-            <onContinuedConversation id="MainRouter"/>
-        </routing>
-    </agent>
+<!--                The agents and their descriptions are:-->
+<!--                <listRoutes group="MainAgents"/>-->
+<!--            </system>-->
+<!--            <priorConversation/>-->
+<!--            <user keepInConversation="false">-->
+<!--                <userQuery/>-->
+<!--            </user>-->
+<!--        </input>-->
+<!--        <routing>-->
+<!--            <routeBasedOnOutputAgentId/>-->
+<!--        </routing>-->
+<!--    </agent>-->
+<!--    <agent id="GeneralQueryAgent"-->
+<!--           group="MainAgents"-->
+<!--           model="General"-->
+<!--           title="General Query"-->
+<!--           description="Answers general queries. Choose this if knowledge of the currently open project is not needed.">-->
+<!--        <input>-->
+<!--            <system>-->
+<!--                Answer the following query in <userLocale/>.-->
+<!--            </system>-->
+<!--            <priorConversation/>-->
+<!--            <user>-->
+<!--                <userQuery/>-->
+<!--            </user>-->
+<!--        </input>-->
+<!--        <output>-->
+<!--            <assistant>-->
+<!--                <assistantOutput/>-->
+<!--            </assistant>-->
+<!--        </output>-->
+<!--        <routing>-->
+<!--            &lt;!&ndash; TODO Need to set next agent if user enters another prompt &ndash;&gt;-->
+<!--            <onContinuedConversation id="MainRouter"/>-->
+<!--        </routing>-->
+<!--    </agent>-->
+<!--    <agent id="ProgrammingAgent"-->
+<!--           group="MainAgents"-->
+<!--           model="Programming"-->
+<!--           title="Update Project Files"-->
+<!--           description="Can read/write to files in the current project. Pick this agent if the user wants to make changes to any files.">-->
+<!--        <input>-->
+<!--            <system>-->
+<!--                &lt;!&ndash; TODO Include programming rules &ndash;&gt;-->
+<!--            </system>-->
+<!--            <priorConversation/>-->
+<!--            <forEachOpenFile>-->
+<!--                <user>-->
+<!--                    <fileText/>-->
+<!--                </user>-->
+<!--            </forEachOpenFile>-->
+<!--            <user>-->
+<!--                <userQuery/>-->
+<!--            </user>-->
+<!--        </input>-->
+<!--        <output>-->
+<!--            <assistant>-->
+<!--                <assistantOutput/>-->
+<!--            </assistant>-->
+<!--        </output>-->
+<!--        <routing>-->
+<!--            &lt;!&ndash; TODO Handle close conversation &ndash;&gt;-->
+<!--            <applyPatches/>-->
+<!--            <endConversation/>-->
+<!--            <onContinuedConversation id="MainRouter"/>-->
+<!--        </routing>-->
+<!--    </agent>-->
 </config>

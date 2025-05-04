@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<providers>
+    <bedrock>
+        <model name="Sonnet" id="anthropic.claude-3-sonnet*" inputCost="3.0" outputCost="15.0"/>
+        <model name="Haiku" id="anthropic.claude-3-haiku*" inputCost="0.80" outputCost="4.0"/>
+    </bedrock>
+</providers>

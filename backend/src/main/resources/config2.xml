@@ -1,7 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <config>
-    <provider type="bedrock">
-    </provider>
-    <provider type="openrouter">
-    </provider>
+    <providers>
+        <provider type="bedrock">
+        </provider>
+        <provider type="openrouter">
+        </provider>
+    </providers>
+    <mode>
+<!--        Name / description -->
+<!--        LLM Aliases-->
+<!--        Agent to run-->
+<!--        Not visible if provider doesn't have the LLMs-->
+    </mode>
 </config>

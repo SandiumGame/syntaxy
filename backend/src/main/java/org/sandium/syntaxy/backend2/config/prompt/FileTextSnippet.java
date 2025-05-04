@@ -1,4 +1,4 @@
-package org.sandium.syntaxy.backend.config2.prompt;
+package org.sandium.syntaxy.backend2.config.prompt;
 
 import org.sandium.syntaxy.backend.ExecutionContext;
 import org.sandium.syntaxy.backend.config.Config;

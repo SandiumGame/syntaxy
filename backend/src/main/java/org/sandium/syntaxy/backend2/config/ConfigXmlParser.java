@@ -1,4 +1,4 @@
-package org.sandium.syntaxy.backend.config2;
+package org.sandium.syntaxy.backend2.config;
 
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
