@@ -1,7 +1,17 @@
 <config>
+    <!-- TODO change models to provider -->
     <models provider="bedrock">
+        <!-- TODO change name to alias -->
+        <!-- TODO change cost to price -->
+        <!-- TODO price is optional depending on provider -->
+        <!-- TODO Create connection settings yaml file in home dir. Also have connection settings in plugin -->
+        <!-- TODO First connection in settings to have a model takes priority -->
         <model name="Sonnet" id="anthropic.claude-3-sonnet*" inputCost="3.0" outputCost="15.0"/>
         <model name="Haiku" id="anthropic.claude-3-haiku*" inputCost="0.80" outputCost="4.0"/>
+
+        <!-- TODO Alias can point to an alias -->
+        <!-- TODO First alias takes priority. Have aliases section? -->
+        <!-- TODO Need "profile" which contain a list of aliases. User picks root agent and profile -->
 
         <modelAlias name="Haiku" alias="General"/>
         <modelAlias name="Haiku" alias="Programming"/>

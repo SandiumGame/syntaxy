@@ -31,8 +31,12 @@ repositories {
 
 // Dependencies are managed with Gradle version catalog - read more: https://docs.gradle.org/current/userguide/platforms.html#sub:version-catalog
 dependencies {
-    testImplementation(libs.junit)
-    implementation(project(":backend"))
+    implementation("software.amazon.awssdk", "bedrock", "2.30.4")
+    implementation("software.amazon.awssdk", "bedrockruntime", "2.30.4")
+
+    implementation("com.sun.xml.bind", "jaxb-impl", "4.0.5")
+
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.0")
 
     // IntelliJ Platform Gradle Plugin Dependencies Extension - read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html
     intellijPlatform {
@@ -44,7 +48,6 @@ dependencies {
         // Plugin Dependencies. Uses `platformPlugins` property from the gradle.properties file for plugin from JetBrains Marketplace.
         plugins(providers.gradleProperty("platformPlugins").map { it.split(',') })
 
-        instrumentationTools()
         pluginVerifier()
         zipSigner()
         testFramework(TestFrameworkType.Platform)

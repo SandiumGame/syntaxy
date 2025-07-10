@@ -7,7 +7,6 @@ build/
 ### IntelliJ IDEA ###
 .idea/*
 .intellijPlatform/*
-.codebuddy/*
 *.iws
 *.iml
 *.ipr

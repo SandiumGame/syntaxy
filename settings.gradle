@@ -4,4 +4,4 @@ plugins {
 
 rootProject.name = 'Syntaxy'
 
-include 'plugin', 'backend', 'server'
+//include 'plugin', 'backend', 'server'

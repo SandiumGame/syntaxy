@@ -1,7 +1,5 @@
 package org.sandium.syntaxy.backend.llm.conversation;
 
-import org.sandium.syntaxy.backend.llm.Model;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
